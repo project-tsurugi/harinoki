@@ -45,7 +45,7 @@
 
 それぞれの設定は、環境変数で指定する。
 
-| 環境変数名 | 設定内容 | 既定値値 |
+| 環境変数名 | 設定内容 | 既定値 |
 |:--|:--|:-:|
 | `TSURUGI_JWT_CLAIM_ISS` | トークンの発行者名 | `authentication-manager` |
 | `TSURUGI_JWT_CLAIM_AUD` | トークンの受信者 | `metadata-manager` |

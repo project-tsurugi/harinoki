@@ -14,9 +14,9 @@
 
 ## REST API
 
-[IssueServlet]:../src/main/java/com/tsurugidb/mishotai/IssueServlet.java
-[RefreshServlet]:../src/main/java/com/tsurugidb/mishotai/RefreshServlet.java
-[VerifyServlet]:../src/main/java/com/tsurugidb/mishotai/VerifyServlet.java
+[IssueServlet]:../src/main/java/com/tsurugidb/harinoki/IssueServlet.java
+[RefreshServlet]:../src/main/java/com/tsurugidb/harinoki/RefreshServlet.java
+[VerifyServlet]:../src/main/java/com/tsurugidb/harinoki/VerifyServlet.java
 
 ### `issue`
 
@@ -27,6 +27,9 @@
   * パス: `/issue`
   * メソッド: `GET`
   * コンテナ認証: 必要
+    * メソッド: BASIC
+    * realm : `harinoki`
+    * ロール名: `harinoki-user`
   * サーブレット: [IssueServlet]
 * 正常系 (成功)
   * ステータスコード: 200

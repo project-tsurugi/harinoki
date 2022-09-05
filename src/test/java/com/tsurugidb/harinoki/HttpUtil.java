@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 class HttpUtil {
 
+    static final String ROLE_NAME = "harinoki-user";
+
     private final int port;
 
     HttpUtil(int port) {

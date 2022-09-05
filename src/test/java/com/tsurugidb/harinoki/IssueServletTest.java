@@ -24,7 +24,7 @@ class IssueServletTest {
     @BeforeAll
     static void start() throws Exception {
         server.getContext().setAttribute(ConfigurationHandler.ATTRIBUTE_TOKEN_PROVIDER, DEFAULT_PROVIDER);
-        server.addUser("u", "p", "users");
+        server.addUser("u", "p", HttpUtil.ROLE_NAME);
         server.start();
     }
 

@@ -13,11 +13,11 @@
             <url-pattern>/issue</url-pattern>
         </web-resource-collection>
         <auth-constraint>
-            <role-name>users</role-name>
+            <role-name>harinoki-user</role-name>
         </auth-constraint>
     </security-constraint>
     <security-role>
-        <role-name>users</role-name>
+        <role-name>harinoki-user</role-name>
     </security-role>
     <error-page>
         <error-code>401</error-code>

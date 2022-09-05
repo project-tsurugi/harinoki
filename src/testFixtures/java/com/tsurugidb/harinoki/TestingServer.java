@@ -28,7 +28,7 @@ public class TestingServer implements AutoCloseable {
     public TestingServer(int port) {
         server = new Server(port);
         context = new WebAppContext();
-        context.setResourceBase("src/main/resources");
+        context.setResourceBase("src/main/webapp");
         context.setContextPath("/");
         context.setConfigurations(new Configuration[] {
                 new WebAppConfiguration(),

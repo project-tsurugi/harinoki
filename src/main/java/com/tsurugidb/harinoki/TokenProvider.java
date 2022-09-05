@@ -131,7 +131,7 @@ public class TokenProvider {
     }
 
     /**
-     * Returns the signing algorithm
+     * Returns the signing algorithm.
      * @return the signing algorithm
      */
     public Algorithm getAlgorithm() {

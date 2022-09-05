@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'java-test-fixtures'
+    id 'war'
     id 'checkstyle'
     id 'com.github.spotbugs' version '4.7.1'
 }
@@ -12,9 +13,12 @@ repositories {
 dependencies {
     api 'com.google.code.findbugs:jsr305:3.0.2'
     api 'org.slf4j:slf4j-api:1.7.36'
-    api 'jakarta.servlet:jakarta.servlet-api:5.0.0'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api:5.0.0'
     implementation 'com.auth0:java-jwt:3.19.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
+
+    // TODO: logger implementation
+    implementation 'org.slf4j:slf4j-simple:1.7.36'
 
     testFixturesApi 'org.eclipse.jetty:jetty-webapp:11.0.11'
     testFixturesImplementation 'org.eclipse.jetty:jetty-security:11.0.11'

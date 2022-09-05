@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+    <listener>
+        <listener-class>com.tsurugidb.harinoki.ConfigurationHandler</listener-class>
+    </listener>
+    <login-config>
+        <auth-method>BASIC</auth-method>
+        <realm-name>harinoki</realm-name>
+    </login-config>
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>token issuer</web-resource-name>
+            <url-pattern>/issue</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>users</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <security-role>
+        <role-name>users</role-name>
+    </security-role>
+    <error-page>
+        <error-code>401</error-code>
+        <location>/unauthorized</location>
+    </error-page>
+    <servlet>
+        <servlet-name>issue</servlet-name>
+        <servlet-class>com.tsurugidb.harinoki.IssueServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>issue</servlet-name>
+        <url-pattern>/issue</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>refresh</servlet-name>
+        <servlet-class>com.tsurugidb.harinoki.RefreshServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>refresh</servlet-name>
+        <url-pattern>/refresh</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>verify</servlet-name>
+        <servlet-class>com.tsurugidb.harinoki.VerifyServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>verify</servlet-name>
+        <url-pattern>/verify</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>unauthorized</servlet-name>
+        <servlet-class>com.tsurugidb.harinoki.UnauthorizedServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>unauthorized</servlet-name>
+        <url-pattern>/unauthorized</url-pattern>
+    </servlet-mapping>
+</web-app>

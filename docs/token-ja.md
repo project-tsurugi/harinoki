@@ -19,20 +19,16 @@
 
 ### ペイロード
 
-| コード | 概要 | 設定値 |
-|:--|:--|:--|
-| `iss` | トークン発行者 | 環境変数 `TSURUGI_JWT_CLAIM_ISS` に指定した値 |
-| `sub` | トークン用途 | `access`, `refresh` のいずれか |
-| `aud` | トークン受信者 | 環境変数 `TSURUGI_JWT_CLAIM_AUD` に指定した値 |
-| `iat` | トークン発行日時 | トークン発行時刻 |
-| `exp` | トークン有効期限 | トークン発行時刻 + 有効期限 (*1) |
-| `tsurugi/auth/name` | 認証済みユーザ名 | ログインユーザ名 |
+| コード | 概要 | AT 設定値 | RT 設定値 |
+|:--|:--|:--|:--|
+| `iss` | トークン発行者 | 環境変数 `TSURUGI_JWT_CLAIM_ISS` の値 | 環境変数 `TSURUGI_JWT_CLAIM_ISS` の値 |
+| `sub` | トークン用途 | 文字列 `access` | 文字列 `refresh` |
+| `aud` | トークン受信者 | 環境変数 `TSURUGI_JWT_CLAIM_AUD` の値 | 環境変数 `TSURUGI_JWT_CLAIM_ISS` の値 |
+| `iat` | トークン発行日時 | トークン発行時刻 | トークン発行時刻 |
+| `exp` | トークン有効期限 | トークン発行時刻 + 環境変数 `TSURUGI_TOKEN_EXPIRATION` の値 | トークン発行時刻 + 環境変数 `TSURUGI_TOKEN_EXPIRATION_REFRESH` の値 |
+| `tsurugi/auth/name` | 認証済みユーザ名 | ログインユーザ名 | ログインユーザ名 |
 
-----
-(*1): 有効期限はトークンの種類ごとに異なる
-
-* AT : 環境変数 `TSURUGI_TOKEN_EXPIRATION` に指定した値
-* RT : 環境変数 `TSURUGI_TOKEN_EXPIRATION_REFRESH` に指定した値
+上記以外にも、認証サービス内部で利用する値を設定する場合がある。
 
 ### 署名
 

@@ -12,6 +12,14 @@ repositories {
 dependencies {
     api 'com.google.code.findbugs:jsr305:3.0.2'
     api 'org.slf4j:slf4j-api:1.7.36'
+    api 'jakarta.servlet:jakarta.servlet-api:5.0.0'
+    implementation 'com.auth0:java-jwt:3.19.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
+
+    testFixturesImplementation 'org.eclipse.jetty:jetty-server:11.0.11'
+    testFixturesApi 'org.eclipse.jetty:jetty-webapp:11.0.11'
+    testFixturesApi 'org.eclipse.jetty:jetty-security:11.0.11'
+    testFixturesApi 'org.eclipse.jetty:jetty-util:11.0.11'
 
     testImplementation 'org.slf4j:slf4j-simple:1.7.36'
 

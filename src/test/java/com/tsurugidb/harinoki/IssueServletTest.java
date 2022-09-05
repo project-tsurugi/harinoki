@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.Duration;
 
-import org.eclipse.jetty.util.security.Password;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,7 @@ class IssueServletTest {
     @BeforeAll
     static void start() throws Exception {
         server.getContext().setAttribute(ConfigurationHandler.ATTRIBUTE_TOKEN_PROVIDER, DEFAULT_PROVIDER);
-        server.getUserStore().addUser("u", new Password("p"), new String[] { "users" });
+        server.addUser("u", "p", "users");
         server.start();
     }
 

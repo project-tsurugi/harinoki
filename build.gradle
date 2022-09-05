@@ -16,10 +16,10 @@ dependencies {
     implementation 'com.auth0:java-jwt:3.19.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
 
-    testFixturesImplementation 'org.eclipse.jetty:jetty-server:11.0.11'
     testFixturesApi 'org.eclipse.jetty:jetty-webapp:11.0.11'
-    testFixturesApi 'org.eclipse.jetty:jetty-security:11.0.11'
-    testFixturesApi 'org.eclipse.jetty:jetty-util:11.0.11'
+    testFixturesImplementation 'org.eclipse.jetty:jetty-security:11.0.11'
+    testFixturesImplementation 'org.eclipse.jetty:jetty-util:11.0.11'
+    testFixturesImplementation 'org.eclipse.jetty:jetty-server:11.0.11'
 
     testImplementation 'org.slf4j:slf4j-simple:1.7.36'
 

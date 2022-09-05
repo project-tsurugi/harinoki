@@ -4,6 +4,7 @@ import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.UserStore;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.security.Password;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -53,11 +54,13 @@ public class TestingServer implements AutoCloseable {
     }
 
     /**
-     * Returns the user store.
-     * @return the user store
+     * Adds a new authorized user.
+     * @param user the user name
+     * @param password the password
+     * @param roles the role names
      */
-    public UserStore getUserStore() {
-        return userStore;
+    public void addUser(String user, String password, String... roles) {
+        userStore.addUser(user, new Password(password), roles);
     }
 
     /**

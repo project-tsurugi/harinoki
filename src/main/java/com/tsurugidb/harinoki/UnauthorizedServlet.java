@@ -18,6 +18,6 @@ public class UnauthorizedServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-        JsonUtil.writeMessage(resp, "unauthorized request");
+        JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "unauthorized request");
     }
 }

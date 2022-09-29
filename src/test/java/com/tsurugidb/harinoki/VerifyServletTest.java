@@ -38,6 +38,7 @@ class VerifyServletTest {
 
         Response response = http.submit("/verify", token);
         assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
         assertEquals(token, response.token);
     }
 
@@ -47,6 +48,7 @@ class VerifyServletTest {
 
         Response response = http.submit("/verify", token);
         assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
         assertEquals(token, response.token);
     }
 
@@ -54,6 +56,7 @@ class VerifyServletTest {
     void no_token() throws Exception {
         Response response = http.get("/verify");
         assertEquals(401, response.code, response::toString);
+        assertEquals(MessageType.NO_TOKEN, response.type);
         assertNull(response.token);
         assertNotNull(response.message);
     }
@@ -61,7 +64,8 @@ class VerifyServletTest {
     @Test
     void basic_auth() throws Exception {
         Response response = http.get("/verify", "u", "p");
-        assertEquals(400, response.code, response::toString);
+        assertEquals(401, response.code, response::toString);
+        assertEquals(MessageType.NO_TOKEN, response.type);
         assertNull(response.token);
         assertNotNull(response.message);
     }
@@ -69,7 +73,8 @@ class VerifyServletTest {
     @Test
     void bad_token() throws Exception {
         Response response = http.submit("/verify", "BROKEN");
-        assertEquals(400, response.code, response::toString);
+        assertEquals(401, response.code, response::toString);
+        assertEquals(MessageType.INVALID_TOKEN, response.type);
         assertNull(response.token);
         assertNotNull(response.message);
     }
@@ -81,9 +86,9 @@ class VerifyServletTest {
                 .issue("u", true);
 
         Response response = http.submit("/verify", token);
-        assertEquals(403, response.code, response::toString);
-        assertNull(response.token);
-        assertNotNull(response.message);
+        assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
+        assertEquals(token, response.token);
     }
 
     @Test
@@ -93,7 +98,8 @@ class VerifyServletTest {
                 .issue("u", false);
 
         Response response = http.submit("/verify", token);
-        assertEquals(403, response.code, response::toString);
+        assertEquals(401, response.code, response::toString);
+        assertEquals(MessageType.INVALID_TOKEN, response.type);
         assertNull(response.token);
         assertNotNull(response.message);
     }

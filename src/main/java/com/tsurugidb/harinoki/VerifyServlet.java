@@ -28,7 +28,7 @@ public class VerifyServlet extends HttpServlet {
             return;
         }
         var provider = ConfigurationHandler.get(getServletContext());
-        if (!TokenUtil.verifyToken(response, provider, token, true, true)) {
+        if (!TokenUtil.verifyToken(response, provider, token, true, true, false)) {
             return;
         }
 

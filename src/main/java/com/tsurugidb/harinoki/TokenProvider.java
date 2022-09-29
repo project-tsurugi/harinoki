@@ -162,13 +162,29 @@ public class TokenProvider {
      */
     public String issue(@Nonnull String user, boolean access) {
         Objects.requireNonNull(user);
+        return issue(user, access, null);
+    }
+
+    /**
+     * Issues a new token.
+     * @param user the user name
+     * @param access issues an access token if {@code true}, or a refresh token
+     * @param maxExpiration the maximum expiration time
+     * @return the issued token
+     */
+    public String issue(@Nonnull String user, boolean access, @Nullable Duration maxExpiration) {
+        Objects.requireNonNull(user);
         var now = getIssuedAt();
+        var expiration = access ? getAccessExpiration() : getRefreshExpiration();
+        if (maxExpiration != null && expiration.compareTo(maxExpiration) > 0) {
+            expiration = maxExpiration;
+        }
         var token = JWT.create()
                 .withIssuer(getIssuer())
                 .withSubject(access ? SUBJECT_ACCESS_TOKEN : SUBJECT_REFRESH_TOKEN)
                 .withAudience(access ? getAudience() : getIssuer())
                 .withIssuedAt(Date.from(now))
-                .withExpiresAt(Date.from(now.plus(access ? getAccessExpiration() : getRefreshExpiration())))
+                .withExpiresAt(Date.from(now.plus(expiration)))
                 .withClaim(CLAIM_USER_NAME, user)
                 .withJWTId(UUID.randomUUID().toString())
                 .sign(algorithm);

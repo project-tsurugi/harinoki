@@ -10,6 +10,8 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,32 +40,31 @@ class HttpUtil {
 
     Response get(String path, String user, String pass)
             throws URISyntaxException, IOException, InterruptedException {
-        var client = HttpClient.newBuilder()
-                .version(Version.HTTP_1_1)
-                .build();
         String credential = Base64.getEncoder()
                 .encodeToString(String.format("%s:%s", user, pass)
                         .getBytes(StandardCharsets.UTF_8));
-        var request = HttpRequest.newBuilder()
-                .uri(new URI("http", null, "localhost", port, path, null, null))
-                .header("Authorization", String.format("Basic %s", credential))
-                .GET()
-                .build();
-        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-        return analyze(response);
+        return submit(path, request -> {
+            request.header("Authorization", String.format("Basic %s", credential));
+        });
     }
 
     Response submit(String path, String token)
+            throws URISyntaxException, IOException, InterruptedException {
+        return submit(path, request -> {
+            request.header("Authorization", String.format("Bearer %s", token));
+        });
+    }
+
+    Response submit(String path, Consumer<? super HttpRequest.Builder> patch)
             throws URISyntaxException, IOException, InterruptedException {
         var client = HttpClient.newBuilder()
                 .version(Version.HTTP_1_1)
                 .build();
         var request = HttpRequest.newBuilder()
                 .uri(new URI("http", null, "localhost", port, path, null, null))
-                .header("Authorization", String.format("Bearer %s", token))
-                .GET()
-                .build();
-        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+                .GET();
+        patch.accept(request);
+        HttpResponse<String> response = client.send(request.build(), BodyHandlers.ofString());
         return analyze(response);
     }
 
@@ -75,10 +76,13 @@ class HttpUtil {
             JsonNode tree = mapper.readTree(response.body());
             return new Response(
                     response.statusCode(),
+                    Optional.ofNullable(toString(tree.get(JsonUtil.FIELD_TYPE)))
+                            .map(MessageType::deserialize)
+                            .orElse(MessageType.UNKNOWN),
                     toString(tree.get(JsonUtil.FIELD_TOKEN)),
                     toString(tree.get(JsonUtil.FIELD_MESSAGE)));
         }
-        return new Response(response.statusCode(), null, null);
+        return new Response(response.statusCode(), null, null, null);
     }
 
     private static String toString(JsonNode node) {

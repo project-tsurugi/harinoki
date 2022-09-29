@@ -37,6 +37,7 @@ class IssueServletTest {
     void ok() throws Exception {
         Response response = http.get("/issue", "u", "p");
         assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
         assertNotNull(response.token);
     }
 
@@ -44,6 +45,7 @@ class IssueServletTest {
     void no_auth() throws Exception {
         Response response = http.get("/issue");
         assertEquals(401, response.code, response::toString);
+        assertEquals(MessageType.AUTH_ERROR, response.type);
         assertNull(response.token);
         assertNotNull(response.message);
     }
@@ -52,6 +54,7 @@ class IssueServletTest {
     void failure() throws Exception {
         Response response = http.get("/issue", "u", "X");
         assertEquals(401, response.code, response::toString);
+        assertEquals(MessageType.AUTH_ERROR, response.type);
         assertNull(response.token);
         assertNotNull(response.message);
     }

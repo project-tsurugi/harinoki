@@ -38,15 +38,15 @@ final class TokenUtil {
             LOG.trace("auth header is not set"); //$NON-NLS-1$
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(response, "authentication token required");
+            JsonUtil.writeMessage(response, MessageType.NO_TOKEN, "authentication token required");
             return null;
         }
         Matcher matcher = PATTERN_BEARER.matcher(auth);
         if (!matcher.matches()) {
-            LOG.trace("auth header is bearer"); //$NON-NLS-1$
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            LOG.trace("auth header is not bearer"); //$NON-NLS-1$
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(response, "invalid authentication token");
+            JsonUtil.writeMessage(response, MessageType.NO_TOKEN, "invalid authentication token");
             return null;
         }
         String token = matcher.group("token"); //$NON-NLS-1$
@@ -54,9 +54,9 @@ final class TokenUtil {
             return JWT.decode(token);
         } catch (JWTDecodeException e) {
             LOG.trace("invalid token", e); //$NON-NLS-1$
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(response, "invalid authentication token");
+            JsonUtil.writeMessage(response, MessageType.INVALID_TOKEN, "invalid authentication token");
             return null;
         }
     }
@@ -66,17 +66,18 @@ final class TokenUtil {
             TokenProvider provider,
             DecodedJWT token,
             boolean allowAccess,
-            boolean allowRefresh) throws IOException {
+            boolean allowRefresh,
+            boolean checkExpiration) throws IOException {
         if (allowAccess && isAccessToken(token)) {
-            return verifyToken(response, provider.getAccessTokenVerifier(), token);
+            return verifyToken(response, provider.getAccessTokenVerifier(), token, checkExpiration);
         }
         if (allowRefresh && isRefreshToken(token)) {
-            return verifyToken(response, provider.getRefreshTokenVerifier(), token);
+            return verifyToken(response, provider.getRefreshTokenVerifier(), token, checkExpiration);
         }
         LOG.trace("invalid subject: {}", token.getSubject()); //$NON-NLS-1$
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(Constants.HTTP_CONTENT_TYPE);
-        JsonUtil.writeMessage(response, "invalid token subject");
+        JsonUtil.writeMessage(response, MessageType.INVALID_AUDIENCE, "invalid token subject");
         return false;
     }
 
@@ -92,21 +93,27 @@ final class TokenUtil {
         return token.getClaim(TokenProvider.CLAIM_USER_NAME).asString();
     }
 
-    private static boolean verifyToken(HttpServletResponse response, JWTVerifier verifier, DecodedJWT token)
-            throws IOException {
+    private static boolean verifyToken(
+            HttpServletResponse response,
+            JWTVerifier verifier,
+            DecodedJWT token,
+            boolean checkExpiration) throws IOException {
         try {
             verifier.verify(token);
             return true;
         } catch (TokenExpiredException e) {
             LOG.trace("token expired", e); //$NON-NLS-1$
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            if (!checkExpiration) {
+                return true;
+            }
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(response, "authentication token expired");
+            JsonUtil.writeMessage(response, MessageType.TOKEN_EXPIRED, "authentication token expired");
         } catch (JWTVerificationException e) {
             LOG.trace("token invalid", e); //$NON-NLS-1$
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(response, "invalid authentication token");
+            JsonUtil.writeMessage(response, MessageType.INVALID_TOKEN, "invalid authentication token signature");
         }
         return false;
     }

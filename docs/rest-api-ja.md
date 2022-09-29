@@ -36,6 +36,7 @@
   * `Content-Type: application/json`
   * ボディ (JSON)
     * `token` - RT
+    * `type` - `ok`
     * `message` - メッセージ (optional)
 * 異常系 (認証エラー)
   * (アプリケーションサーバーの挙動に従う)
@@ -49,6 +50,7 @@
   * メソッド: `GET`
   * パラメータ
     * `Authorization: Bearer {RT}`
+    * `X-Harinoki-Token-Expiration: <max expiration time in seconds>` (optional)
   * コンテナ認証: 不要
   * サーブレット: [RefreshServlet]
 * 正常系 (成功)
@@ -59,12 +61,28 @@
     * `message` - メッセージ (optional)
 * 異常系 (トークン未指定)
   * ステータスコード: 401
+  * ボディ (JSON)
+    * `token` - N/A
+    * `type` - `no_token`
+    * `message` - メッセージ (optional)
 * 異常系 (トークン期限切れ)
-  * ステータスコード: 403
+  * ステータスコード: 401
+  * ボディ (JSON)
+    * `token` - N/A
+    * `type` - `token_expired`
+    * `message` - メッセージ (optional)
 * 異常系 (RTでないトークン)
-  * ステータスコード: 403
+  * ステータスコード: 401
+  * ボディ (JSON)
+    * `token` - N/A
+    * `type` - `invalid_audience`
+    * `message` - メッセージ (optional)
 * 異常系 (不正なトークン)
-  * ステータスコード: 400
+  * ステータスコード: 401
+  * ボディ (JSON)
+    * `token` - N/A
+    * `type` - `invalid_token`
+    * `message` - メッセージ (optional)
 
 ### `verify`
 
@@ -86,10 +104,15 @@
     * `message` - メッセージ (optional)
 * 異常系 (トークン未指定)
   * ステータスコード: 401
-* 異常系 (トークン期限切れ)
-  * ステータスコード: 403
+    * `token` - N/A
+    * `type` - `no_token`
+    * `message` - メッセージ (optional)
 * 異常系 (不正なトークン)
-  * ステータスコード: 400
+  * ステータスコード: 401
+  * ボディ (JSON)
+    * `token` - N/A
+    * `type` - `invalid_token`
+    * `message` - メッセージ (optional)
 
 ## 参考文献
 

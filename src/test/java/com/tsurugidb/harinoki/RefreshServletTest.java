@@ -41,11 +41,38 @@ class RefreshServletTest {
 
         Response response = http.submit("/refresh", token);
         assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
         assertNotNull(token, response.token);
 
         DecodedJWT jwt = JWT.decode(response.token);
         assertTrue(TokenUtil.isAccessToken(jwt));
         assertEquals("u", TokenUtil.getUserName(jwt));
+        assertEquals(
+                DEFAULT_PROVIDER.getAccessExpiration(),
+                Duration.ofMillis(
+                        jwt.getExpiresAt().toInstant().toEpochMilli() - jwt.getIssuedAt().toInstant().toEpochMilli()));
+    }
+
+    @Test
+    void max_expiration() throws Exception {
+        String token = DEFAULT_PROVIDER.issue("u", false);
+
+        Response response = http.submit("/refresh", request -> {
+            request.header("Authorization", String.format("Bearer %s", token));
+            request.header(RefreshServlet.KEY_TOKEN_EXPIRATION, "12");
+        });
+
+        assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
+        assertNotNull(token, response.token);
+
+        DecodedJWT jwt = JWT.decode(response.token);
+        assertTrue(TokenUtil.isAccessToken(jwt));
+        assertEquals("u", TokenUtil.getUserName(jwt));
+        assertEquals(
+                Duration.ofSeconds(12),
+                Duration.ofMillis(
+                        jwt.getExpiresAt().toInstant().toEpochMilli() - jwt.getIssuedAt().toInstant().toEpochMilli()));
     }
 
     @Test
@@ -53,7 +80,8 @@ class RefreshServletTest {
         String token = DEFAULT_PROVIDER.issue("u", true);
 
         Response response = http.submit("/refresh", token);
-        assertEquals(403, response.code, response::toString);
+        assertEquals(401, response.code, response::toString);
+        assertEquals(MessageType.INVALID_AUDIENCE, response.type);
         assertNull(response.token);
         assertNotNull(response.message);
     }
@@ -62,6 +90,20 @@ class RefreshServletTest {
     void no_token() throws Exception {
         Response response = http.get("/refresh");
         assertEquals(401, response.code, response::toString);
+        assertEquals(MessageType.NO_TOKEN, response.type);
+        assertNull(response.token);
+        assertNotNull(response.message);
+    }
+
+    @Test
+    void expired_token() throws Exception {
+        String token = new TokenProvider(
+                "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(-1), Algorithm.none())
+                .issue("u", false);
+
+        Response response = http.submit("/refresh", token);
+        assertEquals(401, response.code, response::toString);
+        assertEquals(MessageType.TOKEN_EXPIRED, response.type);
         assertNull(response.token);
         assertNotNull(response.message);
     }

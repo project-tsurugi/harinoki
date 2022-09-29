@@ -27,7 +27,7 @@ public class IssueServlet extends HttpServlet {
             LOG.trace("unauthorized"); //$NON-NLS-1$
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(resp, "authentication required");
+            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication required");
             return;
         }
         TokenProvider tokens = ConfigurationHandler.get(getServletContext());

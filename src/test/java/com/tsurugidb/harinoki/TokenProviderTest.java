@@ -60,6 +60,24 @@ class TokenProviderTest {
     }
 
     @Test
+    void expiration() {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        var provider = new TokenProvider(
+                "a",
+                "b",
+                Instant.ofEpochSecond(2),
+                Duration.ofSeconds(100),
+                Duration.ofSeconds(200),
+                algorithm);
+
+        String token = provider.issue("u", true, Duration.ofSeconds(10));
+        DecodedJWT jwt = JWT.decode(token);
+        assertEquals(Instant.ofEpochSecond(2), jwt.getIssuedAt().toInstant());
+        assertEquals(Instant.ofEpochSecond(12), jwt.getExpiresAt().toInstant());
+        algorithm.verify(jwt);
+    }
+
+    @Test
     void verifier_access() {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         var provider = new TokenProvider(

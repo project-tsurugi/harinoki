@@ -47,6 +47,17 @@ final class JsonUtil {
         }
     }
 
+    static void writeOk(@Nonnull HttpServletResponse response) throws IOException {
+        Objects.requireNonNull(response);
+        try (var json = JSON.createGenerator(response.getWriter())) {
+            json.writeStartObject();
+            json.writeStringField(FIELD_TYPE, MessageType.OK.serialize());
+            json.writeNullField(FIELD_TOKEN);
+            json.writeNullField(FIELD_MESSAGE);
+            json.writeEndObject();
+        }
+    }
+
     private JsonUtil() {
         throw new AssertionError();
     }

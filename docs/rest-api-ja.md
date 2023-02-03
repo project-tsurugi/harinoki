@@ -114,6 +114,23 @@
     * `type` - `invalid_token`
     * `message` - メッセージ (optional)
 
+### `hello`
+
+* 概要
+  * 常に OK を返す
+* リクエスト
+  * パス: `/hello`
+  * メソッド: `GET`
+  * コンテナ認証: 不要
+  * サーブレット: [HelloServlet]
+* 正常系 (成功)
+  * ステータスコード: 200
+  * `Content-Type: application/json`
+  * ボディ (JSON)
+    * `token` - N/A
+    * `type` - `ok`
+    * `message` - メッセージ (optional)
+
 ## 参考文献
 
 * [RFC 6750: OAuth 2.0 Bearer Token Usage](https://oauth.net/2/bearer-tokens/) - `Authorization: Bearer {token}` の仕様

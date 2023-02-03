@@ -47,6 +47,14 @@
         <servlet-name>verify</servlet-name>
         <url-pattern>/verify</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>hello</servlet-name>
+        <servlet-class>com.tsurugidb.harinoki.HelloServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>hello</servlet-name>
+        <url-pattern>/hello</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>unauthorized</servlet-name>

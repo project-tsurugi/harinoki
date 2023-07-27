@@ -46,11 +46,11 @@
 | `TSURUGI_JWT_CLAIM_ISS` | トークンの発行者名 | `authentication-manager` |
 | `TSURUGI_JWT_CLAIM_AUD` | トークンの受信者 | `metadata-manager` |
 | `TSURUGI_JWT_SECRET_KEY` | 署名鍵 | (N/A) |
-| `TSURUGI_TOKEN_EXPIRATION` | RTの有効期限 (*1) | `300s` |
-| `TSURUGI_TOKEN_EXPIRATION_REFRESH` | ATの有効期限 (*2) | `24h` |
+| `TSURUGI_TOKEN_EXPIRATION` | ATの有効期限 (*1) | `300s` |
+| `TSURUGI_TOKEN_EXPIRATION_REFRESH` | RTの有効期限 (*1) | `24h` |
 
 ----
-(*2): 以下の構文内の `<period>` を利用可能
+(*1): 以下の構文内の `<period>` を利用可能
 
 ```bnf
  <period> ::= <integer> <unit>?

@@ -62,12 +62,12 @@
 
 ### 認証管理基盤との相互運用
 
-[証管理基盤の環境変数](https://github.com/project-tsurugi/authentication-manager/blob/master/authentication-manager/docs/authentication_API_specification.md#%E8%AA%8D%E8%A8%BC%E7%AE%A1%E7%90%86%E5%9F%BA%E7%9B%A4) と同様の値を [各環境変数](#設定情報一覧) に指定することで、認証管理基盤と互換性のある AT を生成できる。
-より正確に言えば、本アプリケーションが生成する AT によって、 [認可情報の取得機能](https://github.com/project-tsurugi/authentication-manager/blob/master/authentication-manager/docs/authentication_API_specification.md#get_acls%E3%83%A1%E3%82%BD%E3%83%83%E3%83%89) を利用できる。
+[認証管理基盤の環境変数](https://github.com/project-tsurugi/authentication-manager/blob/master/docs/authentication_API_specification_cpp.md#%E7%92%B0%E5%A2%83%E5%A4%89%E6%95%B0) と同様の値を [各環境変数](#設定情報一覧) に指定することで、認証管理基盤と互換性のある AT を生成できる。
+より正確に言えば、本アプリケーションが生成する AT によって、 [認可情報の取得機能](https://github.com/project-tsurugi/authentication-manager/blob/master/docs/authentication_API_specification_cpp.md#get_acls%E3%83%A1%E3%82%BD%E3%83%83%E3%83%89) を利用できる。
 
 なお、本アプリケーションが生成する RT は、認証管理基盤でリフレッシュすることを想定していない。
 
 ## 参考文献
 
 * [JSON Web Tokens](https://jwt.io/)
-* [認証管理基盤 API仕様書](https://github.com/project-tsurugi/manager/blob/master/authentication-manager/docs/authentication_API_specification.md)
+* [認証管理基盤 API仕様書 C++版](https://github.com/project-tsurugi/authentication-manager/blob/master/docs/authentication_API_specification_cpp.md)

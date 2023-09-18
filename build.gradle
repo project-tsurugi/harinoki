@@ -42,7 +42,6 @@ test {
 }
 
 checkstyle {
-    sourceSets = [ sourceSets.main ]
     if ('strict' == findProperty('checkMode')) {
         maxWarnings = 0
     }
@@ -54,6 +53,5 @@ spotbugsMain {
     }
 }
 
-spotbugsTest {
-    enabled = false
-}
+spotbugsTest.enabled = false
+checkstyleTest.enabled = false

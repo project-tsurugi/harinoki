@@ -7,7 +7,7 @@
     <module name="SuppressWarningsHolder"/>
     <property name="tabWidth" value="4"/>
     <module name="JavadocMethod">
-      <property name="scope" value="protected"/>
+<!--  <property name="scope" value="protected"/> -->
       <property name="validateThrows" value="false"/>
       <property name="tokens" value="METHOD_DEF,CTOR_DEF"/>
     </module>

@@ -57,3 +57,5 @@ spotbugsMain {
 
 spotbugsTest.enabled = false
 checkstyleTest.enabled = false
+spotbugsTestFixtures.enabled = false
+checkstyleTestFixtures.enabled = false

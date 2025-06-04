@@ -1,13 +1,18 @@
 package com.tsurugidb.harinoki;
 
+import java.nio.charset.StandardCharsets;
+import java.security.interfaces.RSAPrivateKey;
+
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.crypto.Cipher;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -49,6 +54,10 @@ public class TokenProvider {
 
     private final JWTVerifier refreshTokenVerifier;
 
+    private final RSAPrivateKey privateKey;
+
+    private final String publicKeyPem;
+
     /**
      * Creates a new instance.
      * @param issuer the token issuer service name
@@ -57,6 +66,8 @@ public class TokenProvider {
      * @param accessExpiration the access expiration period
      * @param refreshExpiration the refresh expiration period
      * @param algorithm the signing algorithm
+     * @param privateKey the private key used in token issue
+     * @param publicKeyPem the public key string used in the signing
      */
     public TokenProvider(
             @Nonnull String issuer,
@@ -64,18 +75,24 @@ public class TokenProvider {
             @Nullable Instant issuedAt,
             @Nonnull Duration accessExpiration,
             @Nonnull Duration refreshExpiration,
-            @Nonnull Algorithm algorithm) {
+            @Nonnull Algorithm algorithm,
+            @Nonnull RSAPrivateKey privateKey,
+            @Nonnull String publicKeyPem) {
         Objects.requireNonNull(issuer);
         Objects.requireNonNull(audience);
         Objects.requireNonNull(accessExpiration);
         Objects.requireNonNull(refreshExpiration);
         Objects.requireNonNull(algorithm);
+        Objects.requireNonNull(privateKey);
+        Objects.requireNonNull(publicKeyPem);
         this.issuer = issuer;
         this.audience = audience;
         this.issuedAt = issuedAt;
         this.accessExpiration = accessExpiration;
         this.refreshExpiration = refreshExpiration;
         this.algorithm = algorithm;
+        this.privateKey = privateKey;
+        this.publicKeyPem = publicKeyPem;
 
         this.accessTokenVerifier = JWT.require(algorithm)
                 .withIssuer(issuer)
@@ -189,5 +206,16 @@ public class TokenProvider {
                 .withJWTId(UUID.randomUUID().toString())
                 .sign(algorithm);
         return token;
+    }
+
+    String publicKeyPem() {
+        return publicKeyPem;
+    }
+
+    String decrypto(String crypted) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+
+        return new String(cipher.doFinal(Base64.getDecoder().decode(crypted)), StandardCharsets.UTF_8);
     }
 }

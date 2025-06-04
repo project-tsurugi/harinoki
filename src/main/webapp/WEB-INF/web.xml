@@ -32,6 +32,14 @@
         <url-pattern>/issue</url-pattern>
     </servlet-mapping>
     <servlet>
+        <servlet-name>issue-encrypted</servlet-name>
+        <servlet-class>com.tsurugidb.harinoki.IssueEncryptedServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>issue-encrypted</servlet-name>
+        <url-pattern>/issue-encrypted</url-pattern>
+    </servlet-mapping>
+    <servlet>
         <servlet-name>refresh</servlet-name>
         <servlet-class>com.tsurugidb.harinoki.RefreshServlet</servlet-class>
     </servlet>
@@ -54,6 +62,14 @@
     <servlet-mapping>
         <servlet-name>hello</servlet-name>
         <url-pattern>/hello</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>encryption-key</servlet-name>
+        <servlet-class>com.tsurugidb.harinoki.EncryptionKeyServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>encryption-key</servlet-name>
+        <url-pattern>/encryption-key</url-pattern>
     </servlet-mapping>
 
     <servlet>

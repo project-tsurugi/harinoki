@@ -4,7 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static com.tsurugidb.harinoki.TokenProviderFactory.*;
 
 import java.io.IOException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -32,7 +40,7 @@ class TokenProviderFactoryTest {
         var mock = new Mock(Map.of(
                 KEY_ISSUER, "a",
                 KEY_AUDIENCE, "b",
-                KEY_SECRET, "c",
+                KEY_SECRET, Constants.SECRET_KEY,
                 KEY_ACCESS_EXPIRATION, "1",
                 KEY_REFRESH_EXPIRATION, "2"));
 
@@ -40,7 +48,7 @@ class TokenProviderFactoryTest {
         assertEquals("a", provider.getIssuer());
         assertEquals("b", provider.getAudience());
         assertArrayEquals(
-                Algorithm.HMAC256("c").sign(new byte[] { 1, 2, 3 }, new byte[] { 4, 5, 6 }),
+                Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.PUBLIC_KEY), TokenProviderFactory.createPrivateKey(Constants.SECRET_KEY)).sign(new byte[] { 1, 2, 3 }, new byte[] { 4, 5, 6 }),
                 provider.getAlgorithm().sign(new byte[] { 1, 2, 3 }, new byte[] { 4, 5, 6 }));
         assertEquals(Duration.ofSeconds(1), provider.getAccessExpiration());
         assertEquals(Duration.ofSeconds(2), provider.getRefreshExpiration());
@@ -48,7 +56,8 @@ class TokenProviderFactoryTest {
 
     @Test
     void defaults() throws Exception {
-        var mock = new Mock(Map.of(KEY_SECRET, "c"));
+        var mock = new Mock(Map.of(
+                KEY_SECRET, Constants.SECRET_KEY));
 
         TokenProvider provider = mock.newInstance();
         assertEquals(DEFAULT_ISSUER, provider.getIssuer());
@@ -60,7 +69,7 @@ class TokenProviderFactoryTest {
     @Test
     void duration_hour() throws Exception {
         var mock = new Mock(Map.of(
-                KEY_SECRET, "c",
+                KEY_SECRET, Constants.SECRET_KEY,
                 KEY_ACCESS_EXPIRATION, "2h",
                 KEY_REFRESH_EXPIRATION, "3hours"));
 
@@ -72,7 +81,7 @@ class TokenProviderFactoryTest {
     @Test
     void duration_minute() throws Exception {
         var mock = new Mock(Map.of(
-                KEY_SECRET, "c",
+                KEY_SECRET, Constants.SECRET_KEY,
                 KEY_ACCESS_EXPIRATION, "2min",
                 KEY_REFRESH_EXPIRATION, "3minutes"));
 
@@ -84,7 +93,7 @@ class TokenProviderFactoryTest {
     @Test
     void duration_seconds() throws Exception {
         var mock = new Mock(Map.of(
-                KEY_SECRET, "c",
+                KEY_SECRET, Constants.SECRET_KEY,
                 KEY_ACCESS_EXPIRATION, "2s",
                 KEY_REFRESH_EXPIRATION, "3seconds"));
 
@@ -105,6 +114,6 @@ class TokenProviderFactoryTest {
                 KEY_SECRET, "c",
                 KEY_ACCESS_EXPIRATION, "2c"));
 
-        assertThrows(IOException.class, () -> mock.newInstance());
+        assertThrows(IllegalArgumentException.class, () -> mock.newInstance());
     }
 }

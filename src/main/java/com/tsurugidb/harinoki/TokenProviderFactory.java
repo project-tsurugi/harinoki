@@ -20,6 +20,9 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +58,17 @@ class TokenProviderFactory {
 
     public static final Duration DEFAULT_REFRESH_EXPIRATION = Duration.ofHours(24);
 
+    private Context envCtx;
+
+    TokenProviderFactory() {
+        try {
+            Context initCtx = new InitialContext();
+            this.envCtx = (Context) initCtx.lookup("java:comp/env");
+        } catch (NamingException e) {
+            this.envCtx = null;
+        }
+    }
+
     /**
      * Returns a new {@link TokenProvider}.
      * @return the created token provider
@@ -82,9 +96,16 @@ class TokenProviderFactory {
      */
     String getEnvironmentVariable(@Nonnull String key, @Nullable String defaultValue) {
         LOG.trace("loading environment variable: {}", key); //$NON-NLS-1$
-        String value = Optional.ofNullable(System.getenv(key))
-                .map(String::strip)
-                .orElse(null);
+        String value = null;
+        try {
+            if (envCtx != null) {
+                value = Optional.ofNullable((String) envCtx.lookup(key))
+                        .map(String::strip)
+                        .orElse(null);
+            }
+        } catch (NamingException e) {
+            value = null;
+        }
         if (value != null) {
             if (LOG.isDebugEnabled()) {
                 if (key.equals(KEY_SECRET)) {

@@ -55,6 +55,13 @@ class HttpUtil {
         });
     }
 
+    Response get(String path, String encryptedCredential)
+            throws URISyntaxException, IOException, InterruptedException {
+        return submit(path, request -> {
+                request.header("X-Encrypted-Credentials", encryptedCredential);
+        });
+    }
+
     Response submit(String path, Consumer<? super HttpRequest.Builder> patch)
             throws URISyntaxException, IOException, InterruptedException {
         var client = HttpClient.newBuilder()
@@ -80,9 +87,11 @@ class HttpUtil {
                             .map(MessageType::deserialize)
                             .orElse(MessageType.UNKNOWN),
                     toString(tree.get(JsonUtil.FIELD_TOKEN)),
-                    toString(tree.get(JsonUtil.FIELD_MESSAGE)));
+                    toString(tree.get(JsonUtil.FIELD_MESSAGE)),
+                    toString(tree.get(JsonUtil.FIELD_KEY_TYPE)),
+                    toString(tree.get(JsonUtil.FIELD_KEY_DATA)));
         }
-        return new Response(response.statusCode(), null, null, null);
+        return new Response(response.statusCode(), null, null, null, null, null);
     }
 
     private static String toString(JsonNode node) {

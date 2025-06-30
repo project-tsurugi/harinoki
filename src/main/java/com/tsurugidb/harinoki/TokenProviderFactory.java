@@ -1,6 +1,14 @@
 package com.tsurugidb.harinoki;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -15,14 +23,12 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,32 +46,42 @@ class TokenProviderFactory {
             "(?<time>[1-9][0-9]*)\\s*((?<hour>h(ours?)?)|(?<minute>min(utes?)?)|s(ec(onds?)?)?)?",
             Pattern.CASE_INSENSITIVE);
 
-    public static final String KEY_ISSUER = "TSURUGI_JWT_CLAIM_ISS"; //$NON-NLS-1$
+    public static final String KEY_ISSUER = "tsurugi.jwt.claim_iss"; //$NON-NLS-1$
 
-    public static final String KEY_AUDIENCE = "TSURUGI_JWT_CLAIM_AUD"; //$NON-NLS-1$
+    public static final String KEY_AUDIENCE = "tsurugi.jwt.claim_aud"; //$NON-NLS-1$
 
-    public static final String KEY_SECRET = "TSURUGI_JWT_SECRET_KEY"; //$NON-NLS-1$
+    public static final String KEY_PRIVATE_KEY = "tsurugi.jwt.private_key"; //$NON-NLS-1$
 
-    public static final String KEY_ACCESS_EXPIRATION = "TSURUGI_TOKEN_EXPIRATION"; //$NON-NLS-1$
+    public static final String KEY_ACCESS_EXPIRATION = "Tsurugi.token.expiration"; //$NON-NLS-1$
 
-    public static final String KEY_REFRESH_EXPIRATION = "TSURUGI_TOKEN_EXPIRATION_REFRESH"; //$NON-NLS-1$
+    public static final String KEY_REFRESH_EXPIRATION = "tsurugi.token.expiration_refresh"; //$NON-NLS-1$
 
     public static final String DEFAULT_ISSUER = "authentication-manager"; //$NON-NLS-1$
 
     public static final String DEFAULT_AUDIENCE = "metadata-manager"; //$NON-NLS-1$
 
+    public static final String DEFAULT_PRIVATE_KEY = "jwt.pem"; //$NON-NLS-1$
+
     public static final Duration DEFAULT_ACCESS_EXPIRATION = Duration.ofSeconds(300);
 
     public static final Duration DEFAULT_REFRESH_EXPIRATION = Duration.ofHours(24);
 
-    private Context envCtx;
+    private Path base = null;
 
+    private Properties properties = new Properties();
+
+    /**
+     * Creates a new instance.
+     */
     TokenProviderFactory() {
-        try {
-            Context initCtx = new InitialContext();
-            this.envCtx = (Context) initCtx.lookup("java:comp/env");
-        } catch (NamingException e) {
-            this.envCtx = null;
+		String dir = System.getenv("TSURUGI_HOME");
+        if (dir != null) {
+            base = Paths.get(dir, "var", "auth", "etc", "harinoki");
+            try (FileInputStream fileInputStream = new FileInputStream(new File(base.toString(), "jwt.properties"))) {
+                properties.load(fileInputStream);
+            } catch (IOException e) {
+                LOG.error(e.getMessage());
+            }
         }
     }
 
@@ -75,7 +91,12 @@ class TokenProviderFactory {
      * @throws IOException if error was occurred while creating the instance
      */
     public TokenProvider newInstance() throws IOException {
-        RSAPrivateKey privateKey = createPrivateKey(load(KEY_SECRET, (String) null));
+        String keyFileName = load(KEY_PRIVATE_KEY, DEFAULT_PRIVATE_KEY);
+        if (base == null || keyFileName == null) {
+            throw new IOException("base directory is not determined");
+        }
+        String privateKeyFile = load(KEY_PRIVATE_KEY, DEFAULT_PRIVATE_KEY);
+        RSAPrivateKey privateKey = createPrivateKey(privateKey(Paths.get(base.toString(), privateKeyFile)));
         RSAPublicKey publicKey = createPublicKey(privateKey);
         return new TokenProvider(
                 load(KEY_ISSUER, DEFAULT_ISSUER),
@@ -88,6 +109,27 @@ class TokenProviderFactory {
                 publicKeyPem(publicKey));
     }
 
+    String privateKey(Path pemFile) throws IOException {
+        try {
+            return inputStreamToString(new FileInputStream(pemFile.toString()));
+        } catch (FileNotFoundException e) {
+            throw new IOException(MessageFormat.format(
+                "cannot create InputStream from pem file: {0}",
+                pemFile));
+        }
+    }
+
+    private static String inputStreamToString(InputStream input) throws IOException {
+        StringBuilder builder = new StringBuilder();
+        InputStreamReader reader = new InputStreamReader(input, "UTF-8");
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            builder.append(line);
+        }
+        return builder.toString();
+    }
+
     /**
      * Obtains configuration value from environment variables.
      * @param key the variable name
@@ -96,19 +138,12 @@ class TokenProviderFactory {
      */
     String getEnvironmentVariable(@Nonnull String key, @Nullable String defaultValue) {
         LOG.trace("loading environment variable: {}", key); //$NON-NLS-1$
-        String value = null;
-        try {
-            if (envCtx != null) {
-                value = Optional.ofNullable((String) envCtx.lookup(key))
-                        .map(String::strip)
-                        .orElse(null);
-            }
-        } catch (NamingException e) {
-            value = null;
-        }
+        String value = Optional.ofNullable(properties.getProperty(key))
+                .map(String::strip)
+                .orElse(null);
         if (value != null) {
             if (LOG.isDebugEnabled()) {
-                if (key.equals(KEY_SECRET)) {
+                if (key.equals(KEY_PRIVATE_KEY)) {
                     LOG.debug("environment variable: \"{}\" = ***", key);
                 } else {
                     LOG.debug("environment variable: \"{}\" = \"{}\"", key, value);
@@ -123,7 +158,7 @@ class TokenProviderFactory {
         return null;
     }
 
-    private String load(@Nonnull String key, @Nullable String defaultValue) throws IOException {
+    protected String load(@Nonnull String key, @Nullable String defaultValue) throws IOException {
         String value = getEnvironmentVariable(key, defaultValue);
         if (value != null) {
             return value;
@@ -140,7 +175,7 @@ class TokenProviderFactory {
             LOG.debug("environment variable: \"{}\" = \"{}\"", key, value);
             Matcher matcher = PATTERN_DURATION.matcher(value);
             if (!matcher.matches()) {
-                throw new IOException(MessageFormat.format(
+                throw new IllegalArgumentException(MessageFormat.format(
                         "invalid duration format in \"{0}\": \"{1}\"",
                         key,
                         value));

@@ -19,8 +19,8 @@ class RefreshServletTest {
 
     private static final TokenProvider DEFAULT_PROVIDER = new TokenProvider(
             "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(200),
-            Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.PUBLIC_KEY), TokenProviderFactory.createPrivateKey(Constants.SECRET_KEY)),
-            TokenProviderFactory.createPrivateKey(Constants.SECRET_KEY), Constants.PUBLIC_KEY);
+            Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.PUBLIC_KEY), TokenProviderFactory.createPrivateKey(Constants.PRIVATE_KEY)),
+            TokenProviderFactory.createPrivateKey(Constants.PRIVATE_KEY), Constants.PUBLIC_KEY);
 
     private static TestingServer server = new TestingServer(18080);
 
@@ -101,8 +101,8 @@ class RefreshServletTest {
     void expired_token() throws Exception {
         String token = new TokenProvider(
                 "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(-1),
-                Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.PUBLIC_KEY), TokenProviderFactory.createPrivateKey(Constants.SECRET_KEY)),
-                TokenProviderFactory.createPrivateKey(Constants.SECRET_KEY), Constants.PUBLIC_KEY)
+                Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.PUBLIC_KEY), TokenProviderFactory.createPrivateKey(Constants.PRIVATE_KEY)),
+                TokenProviderFactory.createPrivateKey(Constants.PRIVATE_KEY), Constants.PUBLIC_KEY)
                 .issue("u", false);
 
         Response response = http.submit("/refresh", token);

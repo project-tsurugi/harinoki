@@ -54,16 +54,25 @@ public class IssueEncryptedServlet extends HttpServlet {
             return;
         }
 
-        req.login(user, password);
-        if (user.equals(req.getRemoteUser())) {
-            resp.setStatus(HttpServletResponse.SC_OK);
+        try {
+            req.login(user, password);
+        } catch (ServletException e) {  // FIXME why ServletException arise in test
+            LOG.trace("Authentication Failed"); //$NON-NLS-1$
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeToken(resp, tokenProvider.issue(user, false));
+            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed");
             return;
         }
-        LOG.trace("Authentication Failed"); //$NON-NLS-1$
-        resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        String remoteUser = req.getRemoteUser();
+        if (remoteUser == null || !user.equals(remoteUser)) {
+            LOG.trace("Authentication Failed"); //$NON-NLS-1$
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.setContentType(Constants.HTTP_CONTENT_TYPE);
+            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed");
+            return;
+        }
+        resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-        JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed");
+        JsonUtil.writeToken(resp, tokenProvider.issue(user, false));
     }
 }

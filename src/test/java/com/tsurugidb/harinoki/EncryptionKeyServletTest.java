@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import com.auth0.jwt.algorithms.Algorithm;
 
-class HelloServletTest {
+class EncryptionKeyServletTest {
 
     private static final TokenProvider DEFAULT_PROVIDER = new TokenProvider(
             "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(200),
@@ -35,9 +35,10 @@ class HelloServletTest {
 
     @Test
     void ok() throws Exception {
-        Response response = http.get("/hello");
+        Response response = http.get("/encryption-key");
         assertEquals(200, response.code, response::toString);
-        assertEquals(MessageType.OK, response.type);
+        assertEquals("RSA", response.key_type);
+        assertEquals(Constants.PUBLIC_KEY, response.key_data);
         assertNull(response.token);
     }
 }

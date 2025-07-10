@@ -41,6 +41,29 @@
 * 異常系 (認証エラー)
   * (アプリケーションサーバーの挙動に従う)
 
+### `issueEncrypted`
+
+* 概要
+  * 暗号化されたユーザー名とパスワードをヘッダのX-Encrypted-Credentialsエントリとして受け取り、認証を経てRTを発行する
+    * 認証はアプリケーションサーバーの機能を利用して行う
+* リクエスト
+  * パス: `/issueEncrypted`
+  * メソッド: `GET`
+  * コンテナ認証: 必要
+    * メソッド: BASIC
+    * realm : `harinoki`
+    * ロール名: `harinoki-user`
+  * サーブレット: [IssueEncryptedServlet]
+* 正常系 (成功)
+  * ステータスコード: 200
+  * `Content-Type: application/json`
+  * ボディ (JSON)
+    * `token` - RT
+    * `type` - `ok`
+    * `message` - メッセージ (optional)
+* 異常系 (認証エラー)
+  * (アプリケーションサーバーの挙動に従う)
+
 ### `refresh`
 
 * 概要
@@ -113,6 +136,24 @@
     * `token` - N/A
     * `type` - `invalid_token`
     * `message` - メッセージ (optional)
+
+### `encryptionKey`
+
+* 概要
+  * 常に 公開鍵 を返す
+* リクエスト
+  * パス: `encryption-key`
+  * メソッド: `GET`
+  * コンテナ認証: 不要
+  * サーブレット: [EncryptionKeyServlet]
+* 正常系 (成功)
+  * ステータスコード: 200
+  * `Content-Type: application/json`
+  * ボディ (JSON)
+    * `token` - N/A
+    * `type` - `ok`
+    * `key_type` - `RSA`
+    * `key_data` - PEM形式の公開鍵
 
 ### `hello`
 

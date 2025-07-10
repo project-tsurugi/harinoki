@@ -33,9 +33,9 @@
 ### 署名
 
 * 暗号化アルゴリズム
-  * `HS256`
+  * `RS256`
 * 署名鍵
-  * 環境変数 `TSURUGI_JWT_SECRET_KEY` に指定された文字列
+  * `TSURUGI_JWT_PRIVATE_KEY` で指定されるファイルに格納されたRSA秘密鍵（PEM形式）
 
 ## 設定情報一覧
 
@@ -45,7 +45,7 @@
 |:--|:--|:-:|
 | `TSURUGI_JWT_CLAIM_ISS` | トークンの発行者名 | `authentication-manager` |
 | `TSURUGI_JWT_CLAIM_AUD` | トークンの受信者 | `metadata-manager` |
-| `TSURUGI_JWT_SECRET_KEY` | 署名鍵 | (N/A) |
+| `TSURUGI_JWT_PRIVATE_KEY` | 署名鍵ファイル名 | `harinoki.key' |
 | `TSURUGI_TOKEN_EXPIRATION` | ATの有効期限 (*1) | `300s` |
 | `TSURUGI_TOKEN_EXPIRATION_REFRESH` | RTの有効期限 (*1) | `24h` |
 

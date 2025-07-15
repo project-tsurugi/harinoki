@@ -15,8 +15,10 @@
 ## REST API
 
 [IssueServlet]:../src/main/java/com/tsurugidb/harinoki/IssueServlet.java
+[IssueEncryptedServlet]:../src/main/java/com/tsurugidb/harinoki/IssueEncryptedServlet.java
 [RefreshServlet]:../src/main/java/com/tsurugidb/harinoki/RefreshServlet.java
 [VerifyServlet]:../src/main/java/com/tsurugidb/harinoki/VerifyServlet.java
+[EncryptionKeyServlet]:../src/main/java/com/tsurugidb/harinoki/EncryptionKeyServlet.java
 
 ### `issue`
 
@@ -155,7 +157,7 @@
     * `key_type` - `RSA`
     * `key_data` - PEM形式の公開鍵
 
-### `hello`
+### `hello` （接続テスト用、運用では使用しない）
 
 * 概要
   * 常に OK を返す

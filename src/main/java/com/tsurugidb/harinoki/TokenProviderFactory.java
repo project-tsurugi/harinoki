@@ -26,6 +26,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.ServiceConfigurationError;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -63,7 +64,7 @@ class TokenProviderFactory {
 
     public static final String DEFAULT_AUDIENCE = "metadata-manager"; //$NON-NLS-1$
 
-    public static final String DEFAULT_PRIVATE_KEY = "jwt.pem"; //$NON-NLS-1$
+    public static final String DEFAULT_PRIVATE_KEY = "harinoki.pem"; //$NON-NLS-1$
 
     public static final Duration DEFAULT_ACCESS_EXPIRATION = Duration.ofSeconds(300);
 
@@ -75,73 +76,64 @@ class TokenProviderFactory {
 
     private Properties properties = new Properties();
 
-    private String errMessage = null;
-
-    /**
-     * Creates a new instance.
-     */
-    TokenProviderFactory() {
+    void initializeAndCheck() {
         String propertyFile = System.getenv("HARINOKI_PROPERTIES");
+        boolean noError = false;
         if (propertyFile != null) {
             if (propertyFile.startsWith(File.pathSeparator)) {
                 propertyFilePath = Path.of(propertyFile);
             } else {
                 propertyFilePath = Path.of("/", propertyFile);
             }
-            return;
+            noError = true;
         }
         String dir = System.getenv("TSURUGI_HOME");
         if (dir != null) {
-            propertyFilePath = Path.of(dir.toString(), "var", "auth", "etc", "harinoki", "jwt.properties");
-            return;
+            propertyFilePath = Path.of(dir.toString(), "var", "auth", "etc", "harinoki.properties");
+            noError = true;
         }
-        errMessage = "both HARINOKI_PROPERTIES and TSURUGI_HOME are not set";
-    }
-
-    String initializeAndCheck() {
-        if (errMessage != null) {
-            return errMessage;
+        if (!noError) {
+            throw new ServiceConfigurationError("both HARINOKI_PROPERTIES and TSURUGI_HOME are not set");
         }
 
         // check for the base directory
         base = propertyFilePath.getParent();
         if (base == null) {
-            return MessageFormat.format("invalid parent directory of {0}", propertyFilePath);
+            throw new ServiceConfigurationError(MessageFormat.format("invalid parent directory of {0}", propertyFilePath));
         }
         if (!checkPermission(base)) {
-            return MessageFormat.format("invalid permission: {0}", base);
+            throw new ServiceConfigurationError(MessageFormat.format("invalid permission: {0}", base));
         }
 
         // check for the property file
         if (!Files.exists(propertyFilePath)) {
-            return MessageFormat.format("cannot find the property file: {0}", propertyFilePath);
+            throw new ServiceConfigurationError(MessageFormat.format("cannot find the property file: {0}", propertyFilePath));
         }
         if (!checkPermission(propertyFilePath)) {
-            return MessageFormat.format("invalid permission: {0}", propertyFilePath);
+            throw new ServiceConfigurationError(MessageFormat.format("invalid permission: {0}", propertyFilePath));
         }
         try (FileInputStream fileInputStream = new FileInputStream(new File(propertyFilePath.toString()))) {
             try {
                 properties.load(fileInputStream);
             } catch (IOException e) {
-                return MessageFormat.format("failed to load property from {0}", propertyFilePath);
+                throw new ServiceConfigurationError(MessageFormat.format("failed to load property from {0}", propertyFilePath));
             }
         } catch (IOException e) {
-            return MessageFormat.format("cannot create FileInputStream of {0}", propertyFilePath);
+            throw new ServiceConfigurationError(MessageFormat.format("cannot create FileInputStream of {0}", propertyFilePath));
         }
         try {
             // check for the key file
             Path keyFile = Path.of(base.toString(), load(KEY_PRIVATE_KEY, DEFAULT_PRIVATE_KEY));
             if (Files.exists(keyFile)) {
                 if (!checkPermission(keyFile)) {
-                    return MessageFormat.format("invalid permission: {0}", keyFile);
+                    throw new ServiceConfigurationError(MessageFormat.format("invalid permission: {0}", keyFile));
                 }
             } else {
-                return MessageFormat.format("cannot find the key file: {0}", keyFile);
+                throw new ServiceConfigurationError(MessageFormat.format("cannot find the key file: {0}", keyFile));
             }
         } catch (IOException e) {
-            return e.getMessage();
+            throw new ServiceConfigurationError(e.getMessage());
         }
-        return null;
     }
     private boolean checkPermission(Path filePath) {
         try {

@@ -3,7 +3,6 @@ package com.tsurugidb.harinoki;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-import java.util.ServiceConfigurationError;
 
 import javax.annotation.Nonnull;
 
@@ -37,15 +36,11 @@ public class ConfigurationHandler implements ServletContextListener {
     public void contextInitialized(ServletContextEvent event) {
         LOG.trace("initializing context");
 
-        String errMessage = FACTORY.initializeAndCheck();
-        if (errMessage != null) {
-            throw new ServiceConfigurationError(errMessage);
-        }
-
         ServletContext context = event.getServletContext();
 
         // set TokenProvider
         if (context.getAttribute(ATTRIBUTE_TOKEN_PROVIDER) == null) {
+            FACTORY.initializeAndCheck();
             try {
                 TokenProvider provider = FACTORY.newInstance();
                 context.setAttribute(ATTRIBUTE_TOKEN_PROVIDER, provider);

@@ -15,6 +15,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
+import java.util.ServiceConfigurationError;
 
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +29,11 @@ class TokenProviderFactoryTest {
 
         Mock(Map<String, String> env) {
             this.env = env;
-            initializeAndCheck();
+            try {
+                initializeAndCheck();
+            } catch (ServiceConfigurationError e) {
+                // ignore exception as this is test
+            }
         }
 
         @Override

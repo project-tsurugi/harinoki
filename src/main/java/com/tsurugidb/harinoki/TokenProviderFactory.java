@@ -7,8 +7,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
 import java.text.MessageFormat;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -24,6 +26,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,22 +69,98 @@ class TokenProviderFactory {
 
     public static final Duration DEFAULT_REFRESH_EXPIRATION = Duration.ofHours(24);
 
-    private Path base = null;
+    private Path propertyFilePath = null;
+
+    private Path base = null;  // cache of propertyFilePath.getParent()
 
     private Properties properties = new Properties();
+
+    private String errMessage = null;
 
     /**
      * Creates a new instance.
      */
     TokenProviderFactory() {
-		String dir = System.getenv("TSURUGI_HOME");
+        String propertyFile = System.getenv("HARINOKI_PROPERTIES");
+        if (propertyFile != null) {
+            if (propertyFile.startsWith(File.pathSeparator)) {
+                propertyFilePath = Path.of(propertyFile);
+            } else {
+                propertyFilePath = Path.of("/", propertyFile);
+            }
+            return;
+        }
+        String dir = System.getenv("TSURUGI_HOME");
         if (dir != null) {
-            base = Paths.get(dir, "var", "auth", "etc", "harinoki");
-            try (FileInputStream fileInputStream = new FileInputStream(new File(base.toString(), "jwt.properties"))) {
+            propertyFilePath = Path.of(dir.toString(), "var", "auth", "etc", "harinoki", "jwt.properties");
+            return;
+        }
+        errMessage = "both HARINOKI_PROPERTIES and TSURUGI_HOME are not set";
+    }
+
+    String initializeAndCheck() {
+        if (errMessage != null) {
+            return errMessage;
+        }
+
+        // check for the base directory
+        base = propertyFilePath.getParent();
+        if (base == null) {
+            return MessageFormat.format("invalid parent directory of {0}", propertyFilePath);
+        }
+        if (!checkPermission(base)) {
+            return MessageFormat.format("invalid permission: {0}", base);
+        }
+
+        // check for the property file
+        if (!Files.exists(propertyFilePath)) {
+            return MessageFormat.format("cannot find the property file: {0}", propertyFilePath);
+        }
+        if (!checkPermission(propertyFilePath)) {
+            return MessageFormat.format("invalid permission: {0}", propertyFilePath);
+        }
+        try (FileInputStream fileInputStream = new FileInputStream(new File(propertyFilePath.toString()))) {
+            try {
                 properties.load(fileInputStream);
             } catch (IOException e) {
-                LOG.error(e.getMessage());
+                return MessageFormat.format("failed to load property from {0}", propertyFilePath);
             }
+        } catch (IOException e) {
+            return MessageFormat.format("cannot create FileInputStream of {0}", propertyFilePath);
+        }
+        try {
+            // check for the key file
+            Path keyFile = Path.of(base.toString(), load(KEY_PRIVATE_KEY, DEFAULT_PRIVATE_KEY));
+            if (Files.exists(keyFile)) {
+                if (!checkPermission(keyFile)) {
+                    return MessageFormat.format("invalid permission: {0}", keyFile);
+                }
+            } else {
+                return MessageFormat.format("cannot find the key file: {0}", keyFile);
+            }
+        } catch (IOException e) {
+            return e.getMessage();
+        }
+        return null;
+    }
+    private boolean checkPermission(Path filePath) {
+        try {
+            PosixFileAttributes fileAttributes = Files.readAttributes(filePath, PosixFileAttributes.class);
+
+            Set<PosixFilePermission> permissions = fileAttributes.permissions();
+
+            boolean groupRead = permissions.contains(PosixFilePermission.GROUP_READ);
+            boolean groupWrite = permissions.contains(PosixFilePermission.GROUP_WRITE);
+            boolean groupExecute = permissions.contains(PosixFilePermission.GROUP_EXECUTE);
+
+            boolean othersRead = permissions.contains(PosixFilePermission.OTHERS_READ);
+            boolean othersWrite = permissions.contains(PosixFilePermission.OTHERS_WRITE);
+            boolean othersExecute = permissions.contains(PosixFilePermission.OTHERS_EXECUTE);
+
+            return !(groupRead || groupWrite || groupExecute || othersRead || othersWrite || othersExecute);
+
+        } catch (IOException e) {
+            return false;
         }
     }
 
@@ -91,12 +170,8 @@ class TokenProviderFactory {
      * @throws IOException if error was occurred while creating the instance
      */
     public TokenProvider newInstance() throws IOException {
-        String keyFileName = load(KEY_PRIVATE_KEY, DEFAULT_PRIVATE_KEY);
-        if (base == null || keyFileName == null) {
-            throw new IOException("base directory is not determined");
-        }
         String privateKeyFile = load(KEY_PRIVATE_KEY, DEFAULT_PRIVATE_KEY);
-        RSAPrivateKey privateKey = createPrivateKey(privateKey(Paths.get(base.toString(), privateKeyFile)));
+        RSAPrivateKey privateKey = createPrivateKey(privateKey(Path.of(base.toString(), privateKeyFile)));
         RSAPublicKey publicKey = createPublicKey(privateKey);
         return new TokenProvider(
                 load(KEY_ISSUER, DEFAULT_ISSUER),
@@ -164,7 +239,7 @@ class TokenProviderFactory {
             return value;
         }
         throw new IOException(MessageFormat.format(
-                "environment value is not set: {0}",
+                "property value is not set: {0}",
                 key));
     }
 

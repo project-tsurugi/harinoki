@@ -28,6 +28,7 @@ class TokenProviderFactoryTest {
 
         Mock(Map<String, String> env) {
             this.env = env;
+            initializeAndCheck();
         }
 
         @Override

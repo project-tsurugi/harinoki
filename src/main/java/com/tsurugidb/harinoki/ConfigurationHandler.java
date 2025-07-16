@@ -3,6 +3,7 @@ package com.tsurugidb.harinoki;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.ServiceConfigurationError;
 
 import javax.annotation.Nonnull;
 
@@ -35,6 +36,11 @@ public class ConfigurationHandler implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent event) {
         LOG.trace("initializing context");
+
+        String errMessage = FACTORY.initializeAndCheck();
+        if (errMessage != null) {
+            throw new ServiceConfigurationError(errMessage);
+        }
 
         ServletContext context = event.getServletContext();
 

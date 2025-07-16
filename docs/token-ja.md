@@ -43,7 +43,7 @@
 |:--|:--|:-:|
 | `tsurugi.jwt.claim_iss` | トークンの発行者名 | `authentication-manager` |
 | `tsurugi.jwt.claim_aud` | トークンの受信者 | `metadata-manager` |
-| `tsurugi.jwt.private_key_file` | 署名鍵ファイル名 | `jwt.pem' |
+| `tsurugi.jwt.private_key_file` | RSA鍵を格納したファイル名 | `jwt.pem` |
 | `tsurugi.token.expiration` | ATの有効期限 (*1) | `300s` |
 | `tsurugi.token.expiration_refresh` | RTの有効期限 (*1) | `24h` |
 

@@ -52,13 +52,13 @@ openssl genrsa -out harinoki.pem 2048
 propertiesファイル、keyファイル、それらが置かれたディレクトリのotherとgroupのパーミッションはrwxともfalseとする。そうでない場合はパーミッション・エラーとしてharinokiは起動しない。
 
 ## tsurugiインストーラによるharinoki設定
-ユーザによる設定作業を最小限に抑えるため、tsurugiインストーラのharinokiインストールで行っている`${TSURUGI_HOME}/var/auth/etc` ディレクトリへのharinoki-users.props, jaas-login-service.xml, login.confファイル作成に加え、下記を実施する。
+ユーザによる設定作業を最小限に抑えるため、tsurugiインストーラのharinoki設定で行っている`${TSURUGI_HOME}/var/auth/etc` ディレクトリへのharinoki-users.props, jaas-login-service.xml, login.confファイル作成に加え、下記を実施する。
 * `${TSURUGI_HOME}/var/auth/etc` ディレクトリのパーミッションを0700にする（`chmod 700 ${TSURUGI_HOME}/var/auth/etc`）
 * `${TSURUGI_HOME}/var/auth/etc/harinoki.properties` ファイルを作成し、パーミッションを0600、内容を下記にする。
 ```
 tsurugi.jwt.claim_iss=authentication-manager
 tsurugi.jwt.claim_aud=metadata-manager
-tsurugi.jwt.private_key_file=jwt.pem
+tsurugi.jwt.private_key_file=harinoki.pem
 tsurugi.token.expiration=300seconds
 tsurugi.token.expiration_refresh=24hours
 ```

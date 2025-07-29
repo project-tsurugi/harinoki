@@ -72,8 +72,8 @@ AT, RTについては [認証トークン仕様](token-ja.md) 参照。
 
 Tsurugiインストーラが作成するpropertiesファイル（`${TSURUGI_HOME}/var/auth/etc/harinoki.properties`）の内容は下記とする。
 ```
-# tsurugi.jwt.claim_iss=authentication-manager
-# tsurugi.jwt.claim_aud=metadata-manager
+# tsurugi.jwt.claim_iss=harinoki
+# tsurugi.jwt.claim_aud=tsurugidb
 # tsurugi.jwt.private_key_file=harinoki.pem
 # tsurugi.token.expiration=300seconds
 # tsurugi.token.expiration_refresh=24hours
@@ -84,7 +84,7 @@ JWT署名アルゴリズムのRS256で使用するpem形式のRSA秘密鍵
 
 例えば、下記コマンドで作成する。
 ```
-openssl genpkey -algorithm RSA -pkeyopt  rsa_keygen_bits:2048 -out ${TSURUGI_HOME}/var/auth/etc/harinoki.pem 2048
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out ${TSURUGI_HOME}/var/auth/etc/harinoki.pem
 ```
 なお、鍵長（2048）は、1024, 4096でも良い。user名やpasswordの最大長は鍵長の1/8文字となる。
 

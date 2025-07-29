@@ -26,8 +26,8 @@ public class IssueEncryptedServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         LOG.trace("enter: {}", req.getContextPath());
-        String userPassConnected = req.getHeader("X-Encrypted-Credentials");
-        if (userPassConnected == null || userPassConnected.isEmpty()) {
+        String encryptedCredential = req.getHeader("X-Encrypted-Credentials");
+        if (encryptedCredential == null || encryptedCredential.isEmpty()) {
             LOG.trace("unauthorized"); //$NON-NLS-1$
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
@@ -38,14 +38,15 @@ public class IssueEncryptedServlet extends HttpServlet {
         String user;
         String password;
         try {
-            String[] userPass = userPassConnected.split("\\.");
-            if (userPass.length != 2) {
+            String credential = tokenProvider.decrypto(encryptedCredential);
+            String[] userPass = credential.split("\n");
+            if (userPass.length < 2) {
                 resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 resp.setContentType(Constants.HTTP_CONTENT_TYPE);
                 JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "invalid parameter");
             }
-            user = tokenProvider.decrypto(userPass[0]);
-            password = tokenProvider.decrypto(userPass[1]);
+            user = userPass[0];
+            password = userPass[1];
         } catch (Exception e) {
             LOG.trace("Invalid Parameter"); //$NON-NLS-1$
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

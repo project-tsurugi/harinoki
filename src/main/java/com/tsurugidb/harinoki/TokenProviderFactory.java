@@ -60,9 +60,9 @@ class TokenProviderFactory {
 
     public static final String KEY_REFRESH_EXPIRATION = "tsurugi.token.expiration_refresh"; //$NON-NLS-1$
 
-    public static final String DEFAULT_ISSUER = "authentication-manager"; //$NON-NLS-1$
+    public static final String DEFAULT_ISSUER = "harinoki"; //$NON-NLS-1$
 
-    public static final String DEFAULT_AUDIENCE = "metadata-manager"; //$NON-NLS-1$
+    public static final String DEFAULT_AUDIENCE = "tsurugidb"; //$NON-NLS-1$
 
     public static final String DEFAULT_PRIVATE_KEY = "harinoki.pem"; //$NON-NLS-1$
 

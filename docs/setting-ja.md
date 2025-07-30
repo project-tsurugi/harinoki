@@ -9,8 +9,8 @@ TsurugiインストーラによるTsurugidbインストール直後から `$TSUR
 
 インストール直後における認証機能の設定は下記とする。
 
-* login可能ユーザ：Tsurugiインストーラが `$TSURUGI_HOME/var/auth/etc/harinoki-users.props` に設定したユーザ名とパスワードでtsurugidbにlogin可能
-* 管理ユーザ：login可能なユーザ全員（login可能ユーザを追加した場合、全ユーザが管理ユーザになる。管理ユーザを限定する場合は「認証機能の設定変更」項参照。）
+* login可能ユーザ：Tsurugiインストーラが `$TSURUGI_HOME/var/auth/etc/harinoki-users.props` に設定したユーザ名とパスワードでtsurugidbにlogin可能。
+* 管理ユーザ：login可能なユーザ全員。login可能ユーザを追加した場合、全ユーザが管理ユーザになる。管理ユーザを限定する場合は「認証機能の設定変更」項参照。
 
 ## 認証機能の設定変更
 ### login可能ユーザの変更
@@ -126,8 +126,8 @@ tsurugidbにログイン可能なユーザ名とパスワードをBASIC認証で
 ##### その他
 その他のファイルはJettyを適切に動作させるための設定ファイルであり、本資料の説明対象外。
 
-### パーミッション
+### ファイル作成とパーミッション
 propertiesファイル、keyファイル、それらが置かれたディレクトリのotherとgroupのパーミッションを下記により設定する。
 * `$TSURUGI_HOME/var/auth/etc` ディレクトリのパーミッションを0700にする（`chmod 700 $TSURUGI_HOME/var/auth/etc`）
-* `$TSURUGI_HOME/var/auth/etc/harinoki.properties` ファイルを作成し、パーミッションを0600、内容を下記にする。
+* `$TSURUGI_HOME/var/auth/etc/harinoki.properties` 「各ファイルの内容」項の内容で作成し、パーミッションを0600にする。
 * `$TSURUGI_HOME/var/auth/etc/harinoki.key` ファイルを「keyファイル」節で示したコマンドにより作成し、パーミッションを0600にする。

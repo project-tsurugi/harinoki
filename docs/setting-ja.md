@@ -77,10 +77,10 @@ tsurugidbにログイン可能なユーザ名とパスワードをBASIC認証で
 その他のファイルはJettyを適切に動作させるための設定ファイルであり、本資料が説明するファイルの対象外。
 
 #### 各ファイルのパーミッション
-harinoki.propertiesファイル、keyファイル、それらが置かれたディレクトリのotherとgroupにrwxパーミッションが付与されているとHarinokiは起動しないようになっている。
+harinoki.propertiesファイル、keyファイル、それらが置かれたディレクトリのotherとgroupにrwxパーミッションが付与されていると権限エラーとしてHarinokiは起動しない。
 このため、パーミッションは下記となっている。
 * `$TSURUGI_HOME/var/auth/etc` ディレクトリのパーミッションは0700
-* `$TSURUGI_HOME/var/auth/etc/harinoki.properties` と `$TSURUGI_HOME/var/auth/etc/harinoki.key` のパーミッションは0600。
+* `$TSURUGI_HOME/var/auth/etc/harinoki.properties` と `$TSURUGI_HOME/var/auth/etc/harinoki.pem` のパーミッションは0600。
 
 その他のファイルについてはパーミッションに関する制約はない。
 
@@ -105,11 +105,11 @@ harinoki.propertiesファイルは以下で指定されるファイルを使用�
 
 ##### keyファイル
 keyファイルは、harinoki.propertiesファイルが置かれたディレクトリにある以下のファイルを使用する
-* harinoki.propertiesファイルでtsurugi.jwt.private_key_fileが設定されている場合は、その名前のファイルをkeyファイルとして使用する
+* harinoki.propertiesファイルで`tsurugi.jwt.private_key_file`が設定されている場合は、その名前のファイルをkeyファイルとして使用する
   * 指定されたkeyファイルが存在しない場合はkeyファイル不存在エラーとしてHarinokiは起動しない
   * `tsurugi.jwt.private_key_file`で指定されるファイル名（文字列）にFile.separator文字が含まれる場合はkeyファイル名不適切エラーとしてHarinokiは起動しない
-* harinoki.propertiesファイルで`tsurugi.jwt.private_key_file`が設定されていない場合はharinoki.pemをkeyファイルとして使用する 
-  * harinoki.pemファイルが存在しない場合はkeyファイル不存在エラーとしてHarinokiは起動しない
+* harinoki.propertiesファイルで`tsurugi.jwt.private_key_file`が設定されていない場合は`harinoki.pem`をkeyファイルとして使用する 
+  * `harinoki.pem`が存在しない場合はkeyファイル不存在エラーとしてHarinokiは起動しない
 
 ##### その他
 その他のファイルの位置は、環境変数`TSURUGI_HOME`を起点とする固定パスに配置する。
@@ -124,7 +124,7 @@ TsurugiインストーラによりインストールされるHarinokiでは認�
 login可能ユーザを変更するには、 `$TSURUGI_HOME/var/auth/etc/harinoki-users.props` を修正した後、Harinokiを再起動する。
 
 ### 管理ユーザの変更
-管理ユーザの変更は、tsurugidbの[構成ファイルのパラメーター](https://github.com/project-tsurugi/tateyama/blob/master/docs/config_parameters.md)のauthentication.administratorsに管理ユーザを設定した後、tsurugidbを再起動する。
+管理ユーザの変更は、tsurugidbの[構成ファイルのパラメーター](https://github.com/project-tsurugi/tateyama/blob/master/docs/config_parameters.md)の`authentication.administrators`に管理ユーザを設定した後、tsurugidbを再起動する。
 
 ### 高度な設定
 #### harinoki.propertiesファイルによる設定内容の変更

@@ -35,6 +35,8 @@ $TSURUGI_HOME/
         harinoki.war              # HarinokiのWebアプリケーションアーカイブ
 ```
 
+Tsurugi認証機能の実行はharinoki.warを実行するJettyサーバが担い、それを使う際はTsurugi認証機能に対して[RESTful API](rest-api-ja.md)経由でアクセスする。
+
 #### 各ファイルの内容
 ##### propertiesファイル
 下記エントリの設定値をproperties形式で記述する
@@ -58,7 +60,7 @@ Tsurugiインストーラが作成するpropertiesファイル（`$TSURUGI_HOME/
 ```
 
 ##### keyファイル
-JWT署名アルゴリズムのRS256で使用するpem形式のRSA秘密鍵
+keyファイルはJWT署名アルゴリズムのRS256で使用するpem形式のRSA秘密鍵を格納したファイルである。
 
 例えば、下記コマンドで作成する。
 ```
@@ -72,12 +74,12 @@ cf. opensslコマンドはopensslパッケージに含まれている。Tsurugi�
 tsurugidbにログイン可能なユーザ名とパスワードをBASIC認証で使用する形式で記述。Tsurugiインストーラが設定する初期値は「login可能ユーザの変更」項参照。
 
 ##### その他
-その他のファイルはJettyを適切に動作させるための設定ファイルであり、本資料の説明対象外。
+その他のファイルはJettyを適切に動作させるための設定ファイルであり、本資料が説明するファイルの対象外。
 
 #### 各ファイルのパーミッション
 propertiesファイル、keyファイル、それらが置かれたディレクトリのotherとgroupにrwxパーミッションが付与されているとHarinokiは起動しないようになっている。
 このため、パーミッションは下記となっている。
-* `$TSURUGI_HOME/var/auth/etc` ディレクトリのパーミッションは0700（`chmod 700 $TSURUGI_HOME/var/auth/etc`）
+* `$TSURUGI_HOME/var/auth/etc` ディレクトリのパーミッションは0700
 * `$TSURUGI_HOME/var/auth/etc/harinoki.properties` と `$TSURUGI_HOME/var/auth/etc/harinoki.key` のパーミッションは0600。
 
 その他のファイルについてはパーミッションに関する制約はない。

@@ -43,7 +43,7 @@ class TokenProviderFactoryTest {
         @Override
         String privateKey(Path pemFile) throws IOException {
             if (pemFile.endsWith(DEFAULT_PRIVATE_KEY)) {
-                return Constants.PRIVATE_KEY;
+                return Constants.privateKey();
             }
             throw new IOException("no such file");
         }
@@ -62,7 +62,7 @@ class TokenProviderFactoryTest {
         assertEquals("a", provider.getIssuer());
         assertEquals("b", provider.getAudience());
         assertArrayEquals(
-                Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.PUBLIC_KEY), TokenProviderFactory.createPrivateKey(Constants.PRIVATE_KEY)).sign(new byte[] { 1, 2, 3 }, new byte[] { 4, 5, 6 }),
+                Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.publicKey()), TokenProviderFactory.createPrivateKey(Constants.privateKey())).sign(new byte[] { 1, 2, 3 }, new byte[] { 4, 5, 6 }),
                 provider.getAlgorithm().sign(new byte[] { 1, 2, 3 }, new byte[] { 4, 5, 6 }));
         assertEquals(Duration.ofSeconds(1), provider.getAccessExpiration());
         assertEquals(Duration.ofSeconds(2), provider.getRefreshExpiration());

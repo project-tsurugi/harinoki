@@ -15,8 +15,8 @@ class EncryptionKeyServletTest {
 
     private static final TokenProvider DEFAULT_PROVIDER = new TokenProvider(
             "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(200),
-            Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.PUBLIC_KEY), TokenProviderFactory.createPrivateKey(Constants.PRIVATE_KEY)),
-            TokenProviderFactory.createPrivateKey(Constants.PRIVATE_KEY), Constants.PUBLIC_KEY);
+            Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.publicKey()), TokenProviderFactory.createPrivateKey(Constants.privateKey())),
+            TokenProviderFactory.createPrivateKey(Constants.privateKey()), Constants.publicKey());
 
     private static TestingServer server = new TestingServer(18080);
 
@@ -38,7 +38,7 @@ class EncryptionKeyServletTest {
         Response response = http.get("/encryption-key");
         assertEquals(200, response.code, response::toString);
         assertEquals("RSA", response.key_type);
-        assertEquals(Constants.PUBLIC_KEY, response.key_data);
+        assertEquals(Constants.publicKey(), response.key_data);
         assertNull(response.token);
     }
 }

@@ -19,13 +19,13 @@ import org.junit.jupiter.api.Test;
 import com.auth0.jwt.algorithms.Algorithm;
 
 class IssueEncryptedServletTest {
-    private static final RSAPrivateKey privateKey = TokenProviderFactory.createPrivateKey(Constants.PRIVATE_KEY);
+    private static final RSAPrivateKey privateKey = TokenProviderFactory.createPrivateKey(Constants.privateKey());
 
-    private static final RSAPublicKey publicKey = TokenProviderFactory.createPublicKey(Constants.PUBLIC_KEY);
+    private static final RSAPublicKey publicKey = TokenProviderFactory.createPublicKey(Constants.publicKey());
 
     private static final TokenProvider DEFAULT_PROVIDER = new TokenProvider(
             "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(200), Algorithm.RSA256(publicKey, privateKey),
-            privateKey, Constants.PUBLIC_KEY);
+            privateKey, Constants.publicKey());
 
     private static TestingServer server = new TestingServer(18080);
 

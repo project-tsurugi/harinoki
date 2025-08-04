@@ -80,29 +80,4 @@
         <servlet-name>unauthorized</servlet-name>
         <url-pattern>/unauthorized</url-pattern>
     </servlet-mapping>
-    <env-entry>
-        <env-entry-name>TSURUGI_JWT_CLAIM_ISS</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>authentication-manager</env-entry-value>
-    </env-entry>
-    <env-entry>
-        <env-entry-name>TSURUGI_JWT_CLAIM_AUD</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>metadata-manager</env-entry-value>
-    </env-entry>
-    <env-entry>
-        <env-entry-name>TSURUGI_JWT_SECRET_KEY</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>tsurugi.pem</env-entry-value>
-    </env-entry>
-    <env-entry>
-        <env-entry-name>TSURUGI_TOKEN_EXPIRATION</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>300seconds</env-entry-value>
-    </env-entry>
-    <env-entry>
-        <env-entry-name>TSURUGI_TOKEN_EXPIRATION_REFRESH</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>24hours</env-entry-value>
-    </env-entry>
 </web-app>

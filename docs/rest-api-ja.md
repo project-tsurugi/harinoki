@@ -15,8 +15,10 @@
 ## REST API
 
 [IssueServlet]:../src/main/java/com/tsurugidb/harinoki/IssueServlet.java
+[IssueEncryptedServlet]:../src/main/java/com/tsurugidb/harinoki/IssueEncryptedServlet.java
 [RefreshServlet]:../src/main/java/com/tsurugidb/harinoki/RefreshServlet.java
 [VerifyServlet]:../src/main/java/com/tsurugidb/harinoki/VerifyServlet.java
+[EncryptionKeyServlet]:../src/main/java/com/tsurugidb/harinoki/EncryptionKeyServlet.java
 
 ### `issue`
 
@@ -31,6 +33,29 @@
     * realm : `harinoki`
     * ロール名: `harinoki-user`
   * サーブレット: [IssueServlet]
+* 正常系 (成功)
+  * ステータスコード: 200
+  * `Content-Type: application/json`
+  * ボディ (JSON)
+    * `token` - RT
+    * `type` - `ok`
+    * `message` - メッセージ (optional)
+* 異常系 (認証エラー)
+  * (アプリケーションサーバーの挙動に従う)
+
+### `issue-encrypted`
+
+* 概要
+  * 暗号化されたユーザー名とパスワードをヘッダのX-Encrypted-Credentialsエントリとして受け取り、認証を経てRTを発行する
+    * 認証はアプリケーションサーバーの機能を利用して行う
+* リクエスト
+  * パス: `/issue-encrypted`
+  * メソッド: `GET`
+  * コンテナ認証: 必要
+    * メソッド: BASIC
+    * realm : `harinoki`
+    * ロール名: `harinoki-user`
+  * サーブレット: [IssueEncryptedServlet]
 * 正常系 (成功)
   * ステータスコード: 200
   * `Content-Type: application/json`
@@ -114,7 +139,25 @@
     * `type` - `invalid_token`
     * `message` - メッセージ (optional)
 
-### `hello`
+### `encryption-key`
+
+* 概要
+  * 常に 公開鍵 を返す
+* リクエスト
+  * パス: `encryption-key`
+  * メソッド: `GET`
+  * コンテナ認証: 不要
+  * サーブレット: [EncryptionKeyServlet]
+* 正常系 (成功)
+  * ステータスコード: 200
+  * `Content-Type: application/json`
+  * ボディ (JSON)
+    * `token` - N/A
+    * `type` - `ok`
+    * `key_type` - `RSA`
+    * `key_data` - PEM形式の公開鍵
+
+### `hello` （接続テスト用、運用では使用しない）
 
 * 概要
   * 常に OK を返す

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
@@ -56,6 +57,33 @@ class IssueEncryptedServletTest {
         assertEquals(200, response.code, response::toString);
         assertEquals(MessageType.OK, response.type);
         assertNotNull(response.token);
+    }
+
+    @Test
+    void ok_di_empty() throws Exception {
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey("u\np\n"));
+        assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
+        assertNotNull(response.token);
+    }
+
+    @Test
+    void ok_before_di() throws Exception {
+        var di = Instant.now().plusSeconds(3600);
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey("u\np\n" + di.toString()));
+        assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
+        assertNotNull(response.token);
+    }
+
+    @Test
+    void ng_after_di() throws Exception {
+        var di = Instant.now().minusSeconds(3600);
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey("u\np\n" + di.toString()));
+        assertEquals(401, response.code, response::toString);
+        assertEquals(MessageType.AUTH_ERROR, response.type);
+        assertNull(response.token);
+        assertNotNull(response.message);
     }
 
     @Test

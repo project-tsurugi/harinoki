@@ -1,6 +1,8 @@
 package com.tsurugidb.harinoki;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,16 +41,36 @@ public class IssueEncryptedServlet extends HttpServlet {
         String password;
         try {
             String credential = tokenProvider.decrypto(encryptedCredential);
-            String[] userPass = credential.split("\n");
-            if (userPass.length < 2) {
+            String[] userPassDi = credential.split("\n");
+            if (userPassDi.length < 2) {
                 resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 resp.setContentType(Constants.HTTP_CONTENT_TYPE);
                 JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "invalid parameter");
             }
-            user = userPass[0];
-            password = userPass[1];
+            user = userPassDi[0];
+            password = userPassDi[1];
+            if (userPassDi.length > 2) {  // has 3rd line
+                try {
+                    if (!userPassDi[2].isEmpty()) {
+                        var di = Instant.parse(userPassDi[2]);
+                        if (Instant.now().isAfter(di)) {
+                            LOG.trace("credential is no longer valid"); //$NON-NLS-1$
+                            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            resp.setContentType(Constants.HTTP_CONTENT_TYPE);
+                            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "credential is no longer valid");
+                            return;
+                        }
+                    }
+                } catch (DateTimeParseException e) {
+                    LOG.trace("invalid due instant format"); //$NON-NLS-1$
+                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    resp.setContentType(Constants.HTTP_CONTENT_TYPE);
+                    JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "invalid due instant format");
+                    return;
+                }
+            }
         } catch (Exception e) {
-            LOG.trace("Invalid Parameter"); //$NON-NLS-1$
+            LOG.trace("invalid parameter"); //$NON-NLS-1$
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
             JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "invalid parameter");
@@ -58,7 +80,7 @@ public class IssueEncryptedServlet extends HttpServlet {
         try {
             req.login(user, password);
         } catch (ServletException e) {  // FIXME why ServletException arise in test
-            LOG.trace("Authentication Failed"); //$NON-NLS-1$
+            LOG.trace("authentication failed"); //$NON-NLS-1$
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
             JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed");
@@ -66,7 +88,7 @@ public class IssueEncryptedServlet extends HttpServlet {
         }
         String remoteUser = req.getRemoteUser();
         if (remoteUser == null || !user.equals(remoteUser)) {
-            LOG.trace("Authentication Failed"); //$NON-NLS-1$
+            LOG.trace("authentication failed"); //$NON-NLS-1$
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
             JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed");

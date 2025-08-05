@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 final class TokenUtil {
 
-    static final Logger LOG = LoggerFactory.getLogger(VerifyServlet.class);
+    static final Logger LOG = LoggerFactory.getLogger(TokenUtil.class);
 
     static final Pattern PATTERN_BEARER = Pattern.compile("Bearer (?<token>\\S+)");
 
@@ -46,7 +46,7 @@ final class TokenUtil {
             LOG.trace("auth header is not bearer"); //$NON-NLS-1$
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(response, MessageType.NO_TOKEN, "invalid authentication token");
+            JsonUtil.writeMessage(response, MessageType.NO_TOKEN, "invalid authentication header");
             return null;
         }
         String token = matcher.group("token"); //$NON-NLS-1$

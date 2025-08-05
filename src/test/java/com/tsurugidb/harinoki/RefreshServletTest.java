@@ -18,7 +18,9 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 class RefreshServletTest {
 
     private static final TokenProvider DEFAULT_PROVIDER = new TokenProvider(
-            "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(200), Algorithm.none());
+            "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(200),
+            Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.publicKey()), TokenProviderFactory.createPrivateKey(Constants.privateKey())),
+            TokenProviderFactory.createPrivateKey(Constants.privateKey()), Constants.publicKey());
 
     private static TestingServer server = new TestingServer(18080);
 
@@ -98,7 +100,9 @@ class RefreshServletTest {
     @Test
     void expired_token() throws Exception {
         String token = new TokenProvider(
-                "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(-1), Algorithm.none())
+                "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(-1),
+                Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.publicKey()), TokenProviderFactory.createPrivateKey(Constants.privateKey())),
+                TokenProviderFactory.createPrivateKey(Constants.privateKey()), Constants.publicKey())
                 .issue("u", false);
 
         Response response = http.submit("/refresh", token);

@@ -17,14 +17,16 @@ class TokenProviderTest {
 
     @Test
     void access() {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.publicKey()), TokenProviderFactory.createPrivateKey(Constants.privateKey()));
         var provider = new TokenProvider(
                 "a",
                 "b",
                 Instant.ofEpochSecond(2),
                 Duration.ofSeconds(3),
                 Duration.ofSeconds(4),
-                algorithm);
+                algorithm,
+                TokenProviderFactory.createPrivateKey(Constants.privateKey()),
+                Constants.publicKey());
 
         String token = provider.issue("u", true);
         DecodedJWT jwt = JWT.decode(token);
@@ -46,7 +48,9 @@ class TokenProviderTest {
                 Instant.ofEpochSecond(2),
                 Duration.ofSeconds(3),
                 Duration.ofSeconds(4),
-                algorithm);
+                algorithm,
+                TokenProviderFactory.createPrivateKey(Constants.privateKey()),
+                Constants.privateKey());
 
         String token = provider.issue("u", false);
         DecodedJWT jwt = JWT.decode(token);
@@ -68,7 +72,9 @@ class TokenProviderTest {
                 Instant.ofEpochSecond(2),
                 Duration.ofSeconds(100),
                 Duration.ofSeconds(200),
-                algorithm);
+                algorithm,
+                TokenProviderFactory.createPrivateKey(Constants.privateKey()),
+                Constants.privateKey());
 
         String token = provider.issue("u", true, Duration.ofSeconds(10));
         DecodedJWT jwt = JWT.decode(token);
@@ -86,7 +92,9 @@ class TokenProviderTest {
                 Instant.now(),
                 Duration.ofSeconds(10),
                 Duration.ofSeconds(-1),
-                algorithm);
+                algorithm,
+                TokenProviderFactory.createPrivateKey(Constants.privateKey()),
+                Constants.privateKey());
 
         String token = provider.issue("u", true);
         provider.getAccessTokenVerifier().verify(token);
@@ -101,7 +109,9 @@ class TokenProviderTest {
                 Instant.now(),
                 Duration.ofSeconds(-1),
                 Duration.ofSeconds(10),
-                algorithm);
+                algorithm,
+                TokenProviderFactory.createPrivateKey(Constants.privateKey()),
+                Constants.privateKey());
 
         String token = provider.issue("u", false);
         provider.getRefreshTokenVerifier().verify(token);

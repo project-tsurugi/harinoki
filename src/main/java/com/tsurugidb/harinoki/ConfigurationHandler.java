@@ -40,6 +40,7 @@ public class ConfigurationHandler implements ServletContextListener {
 
         // set TokenProvider
         if (context.getAttribute(ATTRIBUTE_TOKEN_PROVIDER) == null) {
+            FACTORY.initializeAndCheck();
             try {
                 TokenProvider provider = FACTORY.newInstance();
                 context.setAttribute(ATTRIBUTE_TOKEN_PROVIDER, provider);

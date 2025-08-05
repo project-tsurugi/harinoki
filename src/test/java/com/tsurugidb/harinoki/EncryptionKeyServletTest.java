@@ -1,7 +1,6 @@
 package com.tsurugidb.harinoki;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.Duration;
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import com.auth0.jwt.algorithms.Algorithm;
 
-class IssueServletTest {
+class EncryptionKeyServletTest {
 
     private static final TokenProvider DEFAULT_PROVIDER = new TokenProvider(
             "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(200),
@@ -26,7 +25,6 @@ class IssueServletTest {
     @BeforeAll
     static void start() throws Exception {
         server.getContext().setAttribute(ConfigurationHandler.ATTRIBUTE_TOKEN_PROVIDER, DEFAULT_PROVIDER);
-        server.addUser("u", "p", HttpUtil.ROLE_NAME);
         server.start();
     }
 
@@ -37,27 +35,10 @@ class IssueServletTest {
 
     @Test
     void ok() throws Exception {
-        Response response = http.get("/issue", "u", "p");
+        Response response = http.get("/encryption-key");
         assertEquals(200, response.code, response::toString);
-        assertEquals(MessageType.OK, response.type);
-        assertNotNull(response.token);
-    }
-
-    @Test
-    void no_auth() throws Exception {
-        Response response = http.get("/issue");
-        assertEquals(401, response.code, response::toString);
-        assertEquals(MessageType.AUTH_ERROR, response.type);
+        assertEquals("RSA", response.key_type);
+        assertEquals(Constants.publicKey(), response.key_data);
         assertNull(response.token);
-        assertNotNull(response.message);
-    }
-
-    @Test
-    void failure() throws Exception {
-        Response response = http.get("/issue", "u", "X");
-        assertEquals(401, response.code, response::toString);
-        assertEquals(MessageType.AUTH_ERROR, response.type);
-        assertNull(response.token);
-        assertNotNull(response.message);
     }
 }

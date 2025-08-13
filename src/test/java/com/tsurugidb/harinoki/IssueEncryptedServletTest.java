@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -16,6 +18,9 @@ import javax.crypto.Cipher;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonFactoryBuilder;
 
 import com.auth0.jwt.algorithms.Algorithm;
 
@@ -39,6 +44,35 @@ class IssueEncryptedServletTest {
         return Base64.getEncoder().withoutPadding().encodeToString(cipher.doFinal(text.getBytes(StandardCharsets.UTF_8)));
     }
 
+    private static final JsonFactory JSON = new JsonFactoryBuilder().build();
+
+    public static final String KEY_FORMAT_VERSION = "format_version";
+
+    public static final String KEY_USER = "user";
+
+    public static final String KEY_PASSWORD = "password";
+
+    public static final String KEY_EXPIRATION_DATE = "expiration_date";
+
+    private static String getJsonText(String user, String password, String expirationDate) throws Exception {
+        StringWriter stringWriter = new StringWriter();
+        try (var writer = JSON.createGenerator(stringWriter)) {
+            writer.writeStartObject();
+            writer.writeFieldName(KEY_FORMAT_VERSION);
+            writer.writeNumber(1);
+            writer.writeFieldName(KEY_USER);
+            writer.writeString(user);
+            writer.writeFieldName(KEY_PASSWORD);
+            writer.writeString(password != null ? password : "");
+            if (expirationDate != null) {
+                writer.writeFieldName(KEY_EXPIRATION_DATE);
+                writer.writeString(expirationDate);
+            }
+            writer.writeEndObject();
+        }
+        return stringWriter.toString();
+    }
+
     @BeforeAll
     static void start() throws Exception {
         server.getContext().setAttribute(ConfigurationHandler.ATTRIBUTE_TOKEN_PROVIDER, DEFAULT_PROVIDER);
@@ -53,15 +87,7 @@ class IssueEncryptedServletTest {
 
     @Test
     void ok() throws Exception {
-        Response response = http.get("/issue-encrypted", encryptoByPublicKey("u\np"));
-        assertEquals(200, response.code, response::toString);
-        assertEquals(MessageType.OK, response.type);
-        assertNotNull(response.token);
-    }
-
-    @Test
-    void ok_di_empty() throws Exception {
-        Response response = http.get("/issue-encrypted", encryptoByPublicKey("u\np\n"));
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey(getJsonText("u", "p", null)));
         assertEquals(200, response.code, response::toString);
         assertEquals(MessageType.OK, response.type);
         assertNotNull(response.token);
@@ -70,7 +96,7 @@ class IssueEncryptedServletTest {
     @Test
     void ok_before_di() throws Exception {
         var di = Instant.now().plusSeconds(3600);
-        Response response = http.get("/issue-encrypted", encryptoByPublicKey("u\np\n" + di.toString()));
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey(getJsonText("u", "p", di.toString())));
         assertEquals(200, response.code, response::toString);
         assertEquals(MessageType.OK, response.type);
         assertNotNull(response.token);
@@ -79,7 +105,17 @@ class IssueEncryptedServletTest {
     @Test
     void ng_after_di() throws Exception {
         var di = Instant.now().minusSeconds(3600);
-        Response response = http.get("/issue-encrypted", encryptoByPublicKey("u\np\n" + di.toString()));
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey(getJsonText("u", "p", di.toString())));
+        assertEquals(401, response.code, response::toString);
+        assertEquals(MessageType.AUTH_ERROR, response.type);
+        assertNull(response.token);
+        assertNotNull(response.message);
+    }
+
+    @Test
+    void ng_invalid_di() throws Exception {
+        var di = Instant.now().plusSeconds(3600);
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey(getJsonText("u", "p", di.toString().replace("T", ""))));
         assertEquals(401, response.code, response::toString);
         assertEquals(MessageType.AUTH_ERROR, response.type);
         assertNull(response.token);
@@ -97,7 +133,7 @@ class IssueEncryptedServletTest {
 
     @Test
     void failure() throws Exception {
-        Response response = http.get("/issue-encrypted", encryptoByPublicKey("u\nx"));
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey(getJsonText("u", "x", null)));
         assertEquals(401, response.code, response::toString);
         assertEquals(MessageType.AUTH_ERROR, response.type);
         assertNull(response.token);

@@ -44,8 +44,8 @@ public class IssueEncryptedServlet extends HttpServlet {
         }
         TokenProvider tokenProvider = ConfigurationHandler.get(getServletContext());
         JsonFactory factory = new JsonFactory();
-        String user = null;
-        String password = null;
+        String user = "";
+        String password = "";
         String expirationDate = null;
         try {
             String jsonText = tokenProvider.decrypto(encryptedCredential);
@@ -61,11 +61,12 @@ public class IssueEncryptedServlet extends HttpServlet {
                     }
                 } else if (token == JsonToken.VALUE_NUMBER_INT) {
                     if (parser.getCurrentName().equals("format_version")) {
-                        var formatVersion = parser.getDoubleValue();
+                        var formatVersion = parser.getIntValue();
                         if (formatVersion > MAXIMUM_FORMAT_VERSION) {
                             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
                             JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "invalid credential version");
+                            return;
                         }
                     }
                 }

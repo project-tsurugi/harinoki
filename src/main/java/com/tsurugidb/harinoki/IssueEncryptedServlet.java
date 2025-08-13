@@ -16,12 +16,18 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+
 /**
  * Issues a new refresh token.
  */
 public class IssueEncryptedServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
+
+    static final int MAXIMUM_FORMAT_VERSION = 1;
 
     static final Logger LOG = LoggerFactory.getLogger(IssueEncryptedServlet.class);
 
@@ -37,35 +43,48 @@ public class IssueEncryptedServlet extends HttpServlet {
             return;
         }
         TokenProvider tokenProvider = ConfigurationHandler.get(getServletContext());
-        String user;
-        String password;
+        JsonFactory factory = new JsonFactory();
+        String user = null;
+        String password = null;
+        String expirationDate = null;
         try {
-            String credential = tokenProvider.decrypto(encryptedCredential);
-            String[] userPassDi = credential.split("\n");
-            if (userPassDi.length < 2) {
-                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-                JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "invalid parameter");
-            }
-            user = userPassDi[0];
-            password = userPassDi[1];
-            if (userPassDi.length > 2) {  // has 3rd line
-                try {
-                    if (!userPassDi[2].isEmpty()) {
-                        var di = Instant.parse(userPassDi[2]);
-                        if (Instant.now().isAfter(di)) {
-                            LOG.trace("credential is no longer valid"); //$NON-NLS-1$
+            String jsonText = tokenProvider.decrypto(encryptedCredential);
+            JsonParser parser = factory.createParser(jsonText);
+            for (JsonToken token = parser.nextToken(); token != null; token = parser.nextToken()) {
+                if (token == JsonToken.VALUE_STRING) {
+                    if (parser.getCurrentName().equals("user")) {
+                        user = parser.getText();
+                    } else if (parser.getCurrentName().equals("password")) {
+                        password = parser.getText();
+                    } else if (parser.getCurrentName().equals("expiration_date")) {
+                        expirationDate = parser.getText();
+                    }
+                } else if (token == JsonToken.VALUE_NUMBER_INT) {
+                    if (parser.getCurrentName().equals("format_version")) {
+                        var formatVersion = parser.getDoubleValue();
+                        if (formatVersion > MAXIMUM_FORMAT_VERSION) {
                             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-                            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "credential is no longer valid");
-                            return;
+                            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "invalid credential version");
                         }
+                    }
+                }
+            }
+            if (expirationDate != null) {
+                try {
+                    var di = Instant.parse(expirationDate);
+                    if (Instant.now().isAfter(di)) {
+                        LOG.trace("credential is no longer valid"); //$NON-NLS-1$
+                        resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        resp.setContentType(Constants.HTTP_CONTENT_TYPE);
+                        JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "credential is no longer valid");
+                        return;
                     }
                 } catch (DateTimeParseException e) {
                     LOG.trace("invalid due instant format"); //$NON-NLS-1$
                     resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-                    JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "invalid due instant format");
+                    JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "invalid expiration date format");
                     return;
                 }
             }
@@ -94,6 +113,7 @@ public class IssueEncryptedServlet extends HttpServlet {
             JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed");
             return;
         }
+
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(Constants.HTTP_CONTENT_TYPE);
         JsonUtil.writeToken(resp, tokenProvider.issue(user, false));

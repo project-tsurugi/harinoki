@@ -56,7 +56,7 @@ class TokenProviderFactory {
 
     public static final String KEY_PRIVATE_KEY = "tsurugi.jwt.private_key"; //$NON-NLS-1$
 
-    public static final String KEY_ACCESS_EXPIRATION = "Tsurugi.token.expiration"; //$NON-NLS-1$
+    public static final String KEY_ACCESS_EXPIRATION = "tsurugi.token.expiration"; //$NON-NLS-1$
 
     public static final String KEY_REFRESH_EXPIRATION = "tsurugi.token.expiration_refresh"; //$NON-NLS-1$
 

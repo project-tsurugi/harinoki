@@ -65,7 +65,7 @@ public class IssueEncryptedServlet extends HttpServlet {
                         if (formatVersion > MAXIMUM_FORMAT_VERSION) {
                             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-                            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "invalid credential version");
+                            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed due to invalid credential version");
                             return;
                         }
                     }
@@ -78,14 +78,14 @@ public class IssueEncryptedServlet extends HttpServlet {
                         LOG.trace("credential is no longer valid"); //$NON-NLS-1$
                         resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-                        JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "credential is no longer valid");
+                        JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed due to credential expiration");
                         return;
                     }
                 } catch (DateTimeParseException e) {
                     LOG.trace("invalid due instant format"); //$NON-NLS-1$
                     resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-                    JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "invalid expiration date format");
+                    JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed due to invalid expiration date format");
                     return;
                 }
             }
@@ -93,7 +93,7 @@ public class IssueEncryptedServlet extends HttpServlet {
             LOG.trace("invalid parameter"); //$NON-NLS-1$
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "invalid parameter");
+            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed due to invalid credential");
             return;
         }
 

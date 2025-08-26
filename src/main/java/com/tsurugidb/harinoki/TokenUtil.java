@@ -38,7 +38,7 @@ final class TokenUtil {
             LOG.trace("auth header is not set"); //$NON-NLS-1$
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(response, MessageType.NO_TOKEN, "authentication token required");
+            JsonUtil.writeMessage(response, MessageType.NO_TOKEN, "authentication failed due to no authentication token");
             return null;
         }
         Matcher matcher = PATTERN_BEARER.matcher(auth);
@@ -46,7 +46,7 @@ final class TokenUtil {
             LOG.trace("auth header is not bearer"); //$NON-NLS-1$
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(response, MessageType.NO_TOKEN, "invalid authentication header");
+            JsonUtil.writeMessage(response, MessageType.NO_TOKEN, "authentication failed due to invalid authentication header");
             return null;
         }
         String token = matcher.group("token"); //$NON-NLS-1$
@@ -56,7 +56,7 @@ final class TokenUtil {
             LOG.trace("invalid token", e); //$NON-NLS-1$
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(response, MessageType.INVALID_TOKEN, "invalid authentication token");
+            JsonUtil.writeMessage(response, MessageType.INVALID_TOKEN, "authentication failed due to invalid authentication token");
             return null;
         }
     }
@@ -77,7 +77,7 @@ final class TokenUtil {
         LOG.trace("invalid subject: {}", token.getSubject()); //$NON-NLS-1$
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(Constants.HTTP_CONTENT_TYPE);
-        JsonUtil.writeMessage(response, MessageType.INVALID_AUDIENCE, "invalid token subject");
+        JsonUtil.writeMessage(response, MessageType.INVALID_AUDIENCE, "authentication failed due to invalid token subject");
         return false;
     }
 
@@ -108,12 +108,12 @@ final class TokenUtil {
             }
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(response, MessageType.TOKEN_EXPIRED, "authentication token expired");
+            JsonUtil.writeMessage(response, MessageType.TOKEN_EXPIRED, "authentication failed as authentication token expired");
         } catch (JWTVerificationException e) {
             LOG.trace("token invalid", e); //$NON-NLS-1$
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(response, MessageType.INVALID_TOKEN, "invalid authentication token signature");
+            JsonUtil.writeMessage(response, MessageType.INVALID_TOKEN, "authentication failed due to invalid authentication token signature");
         }
         return false;
     }

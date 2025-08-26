@@ -103,7 +103,7 @@ public class IssueEncryptedServlet extends HttpServlet {
             LOG.trace("authentication failed"); //$NON-NLS-1$
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed");
+            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed as the combination of user name and password is incorrect");
             return;
         }
         String remoteUser = req.getRemoteUser();
@@ -111,7 +111,7 @@ public class IssueEncryptedServlet extends HttpServlet {
             LOG.trace("authentication failed"); //$NON-NLS-1$
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed");
+            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed as the combination of user name and password is incorrect");
             return;
         }
 

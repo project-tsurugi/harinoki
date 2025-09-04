@@ -15,8 +15,8 @@ class HelloServletTest {
 
     private static final TokenProvider DEFAULT_PROVIDER = new TokenProvider(
             "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(200),
-            Algorithm.RSA256(TokenProviderFactory.createPublicKey(Constants.publicKey()), TokenProviderFactory.createPrivateKey(Constants.privateKey())),
-            TokenProviderFactory.createPrivateKey(Constants.privateKey()), Constants.publicKey());
+            Algorithm.RSA256(TokenProviderFactory.createPublicKey(TestConstants.publicKey()), TokenProviderFactory.createPrivateKey(TestConstants.privateKey())),
+            TokenProviderFactory.createPrivateKey(TestConstants.privateKey()), TestConstants.publicKey());
 
     private static TestingServer server = new TestingServer(18080);
 

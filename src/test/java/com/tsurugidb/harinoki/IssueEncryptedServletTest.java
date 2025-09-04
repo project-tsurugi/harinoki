@@ -25,13 +25,13 @@ import com.fasterxml.jackson.core.JsonFactoryBuilder;
 import com.auth0.jwt.algorithms.Algorithm;
 
 class IssueEncryptedServletTest {
-    private static final RSAPrivateKey privateKey = TokenProviderFactory.createPrivateKey(Constants.privateKey());
+    private static final RSAPrivateKey privateKey = TokenProviderFactory.createPrivateKey(TestConstants.privateKey());
 
-    private static final RSAPublicKey publicKey = TokenProviderFactory.createPublicKey(Constants.publicKey());
+    private static final RSAPublicKey publicKey = TokenProviderFactory.createPublicKey(TestConstants.publicKey());
 
     private static final TokenProvider DEFAULT_PROVIDER = new TokenProvider(
             "i", "a", null, Duration.ofSeconds(100), Duration.ofSeconds(200), Algorithm.RSA256(publicKey, privateKey),
-            privateKey, Constants.publicKey());
+            privateKey, TestConstants.publicKey());
 
     private static TestingServer server = new TestingServer(18080);
 

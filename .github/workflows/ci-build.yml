@@ -1,0 +1,42 @@
+name: Harinoki-CI
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8
+
+    steps:
+      - name: Setup_Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assemble
+        run: |
+          ./gradlew -i clean assemble --warning-mode all
+
+      - name: Check
+        run: |
+          ./gradlew -i check --continue --warning-mode all
+
+      - name: Verify
+        uses: project-tsurugi/tsurugi-annotations-action@v1
+        if: always()
+        with:
+          junit_input: '**/build/test-results/**/TEST-*.xml'
+          junit_test_src_dir: 'src/test/java'
+          spotbugs_input: '**/build/reports/spotbugs/main/*.xml'
+          checkstyle_input: '**/build/reports/checkstyle/main.xml'

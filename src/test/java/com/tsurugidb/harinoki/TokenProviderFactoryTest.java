@@ -34,6 +34,7 @@ class TokenProviderFactoryTest {
             } catch (ServiceConfigurationError e) {
                 // ignore exception as this is test
             }
+            base = Path.of("/"); // dummy
         }
 
         @Override

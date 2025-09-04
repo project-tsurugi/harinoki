@@ -72,7 +72,9 @@ class TokenProviderFactory {
 
     private Path propertyFilePath = null;
 
-    private Path base = null;  // cache of propertyFilePath.getParent()
+    // cache of propertyFilePath.getParent()
+    // It is set to protected because the subclass writes to it during testing.
+    protected Path base = null;
 
     private Properties properties = new Properties();
 

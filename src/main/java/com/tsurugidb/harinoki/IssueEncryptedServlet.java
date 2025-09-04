@@ -1,6 +1,7 @@
 package com.tsurugidb.harinoki;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 
@@ -82,7 +83,9 @@ public class IssueEncryptedServlet extends HttpServlet {
                         return;
                     }
                 } catch (DateTimeParseException e) {
-                    LOG.trace("invalid due instant format"); //$NON-NLS-1$
+                    LOG.warn(MessageFormat.format(
+                            "invalid due instant format: {0}",
+                            expirationDate), e);
                     resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     resp.setContentType(Constants.HTTP_CONTENT_TYPE);
                     JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed due to invalid expiration date format");
@@ -90,7 +93,9 @@ public class IssueEncryptedServlet extends HttpServlet {
                 }
             }
         } catch (Exception e) {
-            LOG.trace("invalid parameter"); //$NON-NLS-1$
+            LOG.warn(MessageFormat.format(
+                    "invalid parameter: {0}",
+                    expirationDate), e);
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
             JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed due to invalid credential");
@@ -100,7 +105,9 @@ public class IssueEncryptedServlet extends HttpServlet {
         try {
             req.login(user, password);
         } catch (ServletException e) {  // FIXME why ServletException arise in test
-            LOG.trace("authentication failed"); //$NON-NLS-1$
+            LOG.warn(MessageFormat.format(
+                    "authentication failed with user: {0}",
+                    user), e);
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
             JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed as the combination of user name and password is incorrect");

@@ -18,7 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
 /**
@@ -50,24 +49,25 @@ public class IssueEncryptedServlet extends HttpServlet {
         String expirationDate = null;
         try {
             String jsonText = tokenProvider.decrypto(encryptedCredential);
-            JsonParser parser = factory.createParser(jsonText);
-            for (JsonToken token = parser.nextToken(); token != null; token = parser.nextToken()) {
-                if (token == JsonToken.VALUE_STRING) {
-                    if (parser.getCurrentName().equals("user")) {
-                        user = parser.getText();
-                    } else if (parser.getCurrentName().equals("password")) {
-                        password = parser.getText();
-                    } else if (parser.getCurrentName().equals("expiration_date")) {
-                        expirationDate = parser.getText();
-                    }
-                } else if (token == JsonToken.VALUE_NUMBER_INT) {
-                    if (parser.getCurrentName().equals("format_version")) {
-                        var formatVersion = parser.getIntValue();
-                        if (formatVersion > MAXIMUM_FORMAT_VERSION) {
-                            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            resp.setContentType(Constants.HTTP_CONTENT_TYPE);
-                            JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed due to invalid credential version");
-                            return;
+            try (var parser = factory.createParser(jsonText)) {
+                for (JsonToken token = parser.nextToken(); token != null; token = parser.nextToken()) {
+                    if (token == JsonToken.VALUE_STRING) {
+                        if (parser.getCurrentName().equals("user")) {
+                            user = parser.getText();
+                        } else if (parser.getCurrentName().equals("password")) {
+                            password = parser.getText();
+                        } else if (parser.getCurrentName().equals("expiration_date")) {
+                            expirationDate = parser.getText();
+                        }
+                    } else if (token == JsonToken.VALUE_NUMBER_INT) {
+                        if (parser.getCurrentName().equals("format_version")) {
+                            var formatVersion = parser.getIntValue();
+                            if (formatVersion > MAXIMUM_FORMAT_VERSION) {
+                                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                resp.setContentType(Constants.HTTP_CONTENT_TYPE);
+                                JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed due to invalid credential version");
+                                return;
+                            }
                         }
                     }
                 }

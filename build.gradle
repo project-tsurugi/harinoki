@@ -17,15 +17,11 @@ dependencies {
     implementation 'com.auth0:java-jwt:3.19.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
 
-    // TODO: logger implementation
-    implementation 'org.slf4j:slf4j-simple:1.7.36'
-
+    implementation 'org.eclipse.jetty:jetty-slf4j-impl:11.0.24'
     testFixturesApi 'org.eclipse.jetty:jetty-webapp:11.0.24'
     testFixturesImplementation 'org.eclipse.jetty:jetty-security:11.0.24'
     testFixturesImplementation 'org.eclipse.jetty:jetty-util:11.0.24'
     testFixturesImplementation 'org.eclipse.jetty:jetty-server:11.0.24'
-
-    testImplementation 'org.slf4j:slf4j-simple:1.7.36'
 
     testImplementation platform('org.junit:junit-bom:5.10.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'

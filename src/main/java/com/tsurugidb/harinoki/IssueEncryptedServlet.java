@@ -93,9 +93,7 @@ public class IssueEncryptedServlet extends HttpServlet {
                 }
             }
         } catch (Exception e) {
-            LOG.warn(MessageFormat.format(
-                    "invalid parameter: {0}",
-                    expirationDate), e);
+            LOG.warn("invalid credential", e);
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.setContentType(Constants.HTTP_CONTENT_TYPE);
             JsonUtil.writeMessage(resp, MessageType.AUTH_ERROR, "authentication failed due to invalid credential");

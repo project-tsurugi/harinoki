@@ -38,7 +38,7 @@ class IssueEncryptedServletTest {
     private final HttpUtil http = new HttpUtil(18080);
 
     private static String encryptoByPublicKey(String text) throws Exception {
-        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
         return Base64.getEncoder().withoutPadding().encodeToString(cipher.doFinal(text.getBytes(StandardCharsets.UTF_8)));

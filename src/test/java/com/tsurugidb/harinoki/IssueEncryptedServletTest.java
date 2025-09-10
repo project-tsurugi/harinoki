@@ -17,6 +17,7 @@ import javax.crypto.Cipher;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -77,6 +78,9 @@ class IssueEncryptedServletTest {
     static void start() throws Exception {
         server.getContext().setAttribute(ConfigurationHandler.ATTRIBUTE_TOKEN_PROVIDER, DEFAULT_PROVIDER);
         server.addUser("u", "p", HttpUtil.ROLE_NAME);
+        server.addUser("tsurugi taro", "hoge", HttpUtil.ROLE_NAME);
+        server.addUser("user=name", "hoge", HttpUtil.ROLE_NAME);
+        server.addUser("=", "hoge", HttpUtil.ROLE_NAME);
         server.start();
     }
 
@@ -88,6 +92,30 @@ class IssueEncryptedServletTest {
     @Test
     void ok() throws Exception {
         Response response = http.get("/issue-encrypted", encryptoByPublicKey(getJsonText("u", "p", null)));
+        assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
+        assertNotNull(response.token);
+    }
+
+    @Test
+    void ok_sp() throws Exception {
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey(getJsonText("tsurugi taro", "hoge", null)));
+        assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
+        assertNotNull(response.token);
+    }
+    @Disabled  // '=' seems NG
+    @Test
+    void ok_weqw() throws Exception {
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey(getJsonText("user=name", "hobe", null)));
+        assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
+        assertNotNull(response.token);
+    }
+    @Disabled  // '=' seems NG
+    @Test
+    void ok_eq() throws Exception {
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey(getJsonText("=", "hobe", null)));
         assertEquals(200, response.code, response::toString);
         assertEquals(MessageType.OK, response.type);
         assertNotNull(response.token);

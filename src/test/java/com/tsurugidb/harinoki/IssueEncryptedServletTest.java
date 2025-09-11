@@ -81,6 +81,8 @@ class IssueEncryptedServletTest {
         server.addUser("tsurugi taro", "hoge", HttpUtil.ROLE_NAME);
         server.addUser("user=name", "hoge", HttpUtil.ROLE_NAME);
         server.addUser("=", "hoge", HttpUtil.ROLE_NAME);
+        server.addUser("password-enclosed-whitespace", " password ", HttpUtil.ROLE_NAME);
+        server.addUser("whitespace-password", " ", HttpUtil.ROLE_NAME);
         server.start();
     }
 
@@ -116,6 +118,20 @@ class IssueEncryptedServletTest {
     @Test
     void ok_eq() throws Exception {
         Response response = http.get("/issue-encrypted", encryptoByPublicKey(getJsonText("=", "hobe", null)));
+        assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
+        assertNotNull(response.token);
+    }
+    @Test
+    void ok_passwordEnclosedWhitespace() throws Exception {
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey(getJsonText("password-enclosed-whitespace", " password ", null)));
+        assertEquals(200, response.code, response::toString);
+        assertEquals(MessageType.OK, response.type);
+        assertNotNull(response.token);
+    }
+    @Test
+    void ok_whitespacePassword() throws Exception {
+        Response response = http.get("/issue-encrypted", encryptoByPublicKey(getJsonText("whitespace-password", " ", null)));
         assertEquals(200, response.code, response::toString);
         assertEquals(MessageType.OK, response.type);
         assertNotNull(response.token);

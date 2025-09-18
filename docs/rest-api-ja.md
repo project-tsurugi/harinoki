@@ -46,13 +46,15 @@
 ### `issue-encrypted`
 
 * 概要
-  * 暗号化されたユーザー名とパスワードをヘッダのX-Encrypted-Credentialsエントリとして受け取り、認証を経てRTを発行する
+  * ユーザー名、パスワード、有効期限を格納したJSONのテキストを暗号化しBase64エンコーディングした文字列（encrypted credential）をヘッダのX-Encrypted-Credentialsエントリとして受け取り、認証を経てRTを発行する。暗号化は2048bitのRSA鍵を使ったRSA/ECB/OAEPWithSHA-1AndMGF1Paddingアルゴリズムにより行う。
     * 認証はアプリケーションサーバーの機能を利用して行う
 * リクエスト
   * パス: `/issue-encrypted`
   * メソッド: `GET`
+  * パラメータ
+    * `X-Encrypted-Credentials: {encrypted credential}`
   * コンテナ認証: 必要
-    * メソッド: BASIC
+    * メソッド: JAASLoginService
     * realm : `harinoki`
     * ロール名: `harinoki-user`
   * サーブレット: [IssueEncryptedServlet]

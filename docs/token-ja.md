@@ -37,7 +37,7 @@
 
 ## 設定情報一覧
 
-それぞれの設定は、propertiesファイルに記述する以下の設定変数で指定する。
+それぞれの設定は、Harinoki設定ファイル（`harinoki.properties`）に記述する以下の設定変数で指定する。
 
 | 設定変数名 | 設定内容 | 既定値 |
 |:--|:--|:-:|
@@ -46,6 +46,8 @@
 | `tsurugi.jwt.private_key_file` | RSA鍵を格納したファイル名 | `harinoki.pem` |
 | `tsurugi.token.expiration` | ATの有効期限 (*1) | `300s` |
 | `tsurugi.token.expiration_refresh` | RTの有効期限 (*1) | `24h` |
+
+RSA鍵を格納したファイルは、Harinoki設定ファイルを格納するディレクトリに配置する。
 
 ----
 (*1): 以下の構文内の `<period>` を利用可能

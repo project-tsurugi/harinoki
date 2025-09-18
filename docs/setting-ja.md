@@ -66,7 +66,7 @@ keyファイルはJWT署名アルゴリズムのRS256で使用するpem形式の
 ```
 openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out $TSURUGI_HOME/var/auth/etc/harinoki.pem
 ```
-なお、鍵長（2048）は、1024, 4096でも良い。暗号化可能な１ブロックは鍵長の1/8文字となる。
+なお、鍵長（2048）は、4096でも良い。暗号化可能な１ブロックは鍵長（ビット数）の約1/8文字となる。
 
 cf. opensslコマンドはopensslパッケージに含まれている。Tsurugiインストーラを実行する環境にopensslパッケージが入っていない場合はインストールが必要。
 
